@@ -1,6 +1,7 @@
 ﻿using System;
 using UIKit;
 using Foundation;
+using LpricharCodeHour.Controls;
 using LpricharCodeHour.Utils;
 
 namespace LpricharCodeHour.Views
@@ -9,6 +10,7 @@ namespace LpricharCodeHour.Views
     public class UniversalView : UIView
     {
         private UILabel _label;
+        private CounterView _counterView;
 
         public UniversalView()
         {
@@ -25,8 +27,18 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
-            _label = AddLabel(this, "lprichar" + Environment.NewLine + "Code Hour");
+            _label = AddLabel(this, "initiating lprichar code hour" + Environment.NewLine + "t minus");
+
+            _counterView = AddCounterView(this);
         }
+
+        private static CounterView AddCounterView(UIView parent)
+        {
+            var counterView = new CounterView();
+            parent.AddSubview(counterView);
+            return counterView;
+        }
+
 
         private static UILabel AddLabel(UIView parent, string text)
         {
@@ -43,8 +55,13 @@ namespace LpricharCodeHour.Views
         private void ConstrainLayout()
         {
             this.ConstrainLayout(() =>
-                _label.Frame.GetCenterX() == Frame.GetCenterX()
-                && _label.Frame.GetCenterY() == Frame.GetCenterY()
+                _label.Frame.Top == Frame.Top + 50
+                && _label.Frame.Left == Frame.Left + 10
+
+                && _counterView.Frame.GetCenterX() == Frame.GetCenterX()
+                && _counterView.Frame.GetCenterY() == Frame.GetCenterY()
+                && _counterView.Frame.Height == 100
+                && _counterView.Frame.Width == 100
             );
         }
     }
