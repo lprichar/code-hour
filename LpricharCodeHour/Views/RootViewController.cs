@@ -9,8 +9,9 @@ namespace LpricharCodeHour.Views
 {
     public class RootView : UIView
     {
-        private UILabel _label;
+        private UILabel _initiatingLabel;
         private CounterView _counterView;
+        private UILabel _counterLabel;
 
         public RootView()
         {
@@ -27,7 +28,8 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
-            _label = AddLabel(this, "initiating lprichar code hour" + Environment.NewLine + "t minus");
+            _initiatingLabel = AddLabel(this, "initiating lprichar code hour" + Environment.NewLine + "t minus");
+            _counterLabel = AddLabel(this, "");
 
             _counterView = AddCounterView(this);
         }
@@ -55,21 +57,26 @@ namespace LpricharCodeHour.Views
         private void ConstrainLayout()
         {
             this.ConstrainLayout(() =>
-                _label.Frame.Top == Frame.Top + 50
-                && _label.Frame.Left == Frame.Left + 10
+                _initiatingLabel.Frame.Top == Frame.Top + 50
+                && _initiatingLabel.Frame.Left == Frame.Left + 10
 
                 && _counterView.Frame.GetCenterX() == Frame.GetCenterX()
                 && _counterView.Frame.GetCenterY() == Frame.GetCenterY()
                 && _counterView.Frame.Height == 100
                 && _counterView.Frame.Width == 100
+
+                && _counterLabel.Frame.GetCenterX() == _counterView.Frame.GetCenterX()
+                && _counterLabel.Frame.GetCenterY() == _counterView.Frame.GetCenterY()
             );
         }
 
         private async Task StartCountdownAnim()
         {
-            for (int i = 10; i > 0; i--)
+            for (int i = 9; i >= 0; i--)
             {
-                var isOdd = i % 2 == 0;
+                var isOdd = i % 2 == 1;
+
+                _counterLabel.Text = i.ToString();
 
                 if (isOdd)
                 {
@@ -87,7 +94,8 @@ namespace LpricharCodeHour.Views
                 while (true)
                 {
                     await StartCountdownAnim();
-                    await Task.Delay(2000);
+                    _counterLabel.Text = "";
+                    await Task.Delay(3000);
                 }
             }
             catch (Exception ex)
