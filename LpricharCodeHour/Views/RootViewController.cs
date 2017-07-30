@@ -15,6 +15,8 @@ namespace LpricharCodeHour.Views
         private UILabel _counterLabel;
         private UIImageView _watchImageView;
         private UIImage _watch;
+        private UILabel _lpricharLabel;
+        private UILabel _codeHourLabel;
 
         public RootView()
         {
@@ -36,6 +38,16 @@ namespace LpricharCodeHour.Views
             _watch = UIImage.FromBundle("Watch");
             _watchImageView = AddImageView(this, _watch);
             _counterView = AddCounterView(this);
+            AddLpricharLabel();
+            _codeHourLabel = AddLabel(this, "code hour", 60);
+            _codeHourLabel.Alpha = 0f;
+        }
+
+        private void AddLpricharLabel()
+        {
+            _lpricharLabel = AddLabel(this, "lprichar", 75);
+            _lpricharLabel.Alpha = 0f;
+            _lpricharLabel.TextColor = UIColor.FromRGB(213, 43, 47);
         }
 
         private static UIImageView AddImageView(UIView parent, UIImage image)
@@ -87,6 +99,12 @@ namespace LpricharCodeHour.Views
 
                 && _watchImageView.Frame.GetCenterY() == Frame.GetCenterY()
                 && _watchImageView.Frame.GetCenterX() == Frame.GetCenterX() + 200
+
+                && _lpricharLabel.Frame.Right == Frame.GetCenterX() + 40
+                && _lpricharLabel.Frame.Bottom == Frame.GetCenterY() - 15
+
+                && _codeHourLabel.Frame.Top == Frame.GetCenterY() + 15
+                && _codeHourLabel.Frame.Right == _lpricharLabel.Frame.Right
             );
         }
 
@@ -126,16 +144,29 @@ namespace LpricharCodeHour.Views
                     await TypeInitiate();
                     await Task.Delay(500);
                     await StartCountdownAnim();
-                    ResetEverything();
                     await ZoomWatch();
+                    await ShowLpricharShowText();
 
                     await Task.Delay(3000);
+                    ResetEverything();
+                    await Task.Delay(5000);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in animation " + ex);
             }
+        }
+
+        private async Task ShowLpricharShowText()
+        {
+            _lpricharLabel.Alpha = 0;
+            _codeHourLabel.Alpha = 0;
+            await UIView.AnimateAsync(.5f, () =>
+            {
+                _lpricharLabel.Alpha = 1;
+                _codeHourLabel.Alpha = 1;
+            });
         }
 
         private async Task ZoomWatch()
@@ -154,6 +185,8 @@ namespace LpricharCodeHour.Views
             _initiatingLabel.Text = "Lees-iPadPro$ ";
             _watchImageView.Alpha = 0;
             _watchImageView.Transform = CGAffineTransform.MakeScale(6f, 6f);
+            _lpricharLabel.Alpha = 0;
+            _codeHourLabel.Alpha = 0;
         }
 
         private async Task TypeInitiate()
