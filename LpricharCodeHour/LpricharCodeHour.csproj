@@ -89,6 +89,7 @@
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Utils\AnimationUtils.cs" />
     <Compile Include="Utils\EasyLayout.cs" />
+    <Compile Include="Utils\TaskUtils.cs" />
     <Compile Include="Views\RootViewController.cs" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -81,11 +81,5 @@ namespace LpricharCodeHour.Utils
                 shapeLayer.Opacity = (float)to;
             }
         }
-
-        public static Task AnimateVisibilityOfAllViews(UIView[] allLabels, bool visible, float duration)
-        {
-            var allAnimations = allLabels.Select(label => { return UIView.AnimateNotifyAsync(duration, () => { label.Alpha = visible ? 1 : 0; }); });
-            return Task.WhenAny(allAnimations);
-        }
     }
 }

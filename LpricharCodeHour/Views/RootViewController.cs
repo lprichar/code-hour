@@ -65,16 +65,29 @@ namespace LpricharCodeHour.Views
             );
         }
 
+        private async Task StartCountdownAnim()
+        {
+            for (int i = 10; i > 0; i--)
+            {
+                var isOdd = i % 2 == 0;
+
+                if (isOdd)
+                {
+                    var pulseDuration = 1.8f;
+                    _counterView.Pulse(pulseDuration).FireAndForget();
+                }
+                await Task.Delay(1000);
+            }
+        }
+
         public async void StartAnimation()
         {
             try
             {
                 while (true)
                 {
-                    await Task.WhenAll(
-                        _counterView.Pulse(),
-                        Task.Delay(2000)
-                        );
+                    await StartCountdownAnim();
+                    await Task.Delay(2000);
                 }
             }
             catch (Exception ex)

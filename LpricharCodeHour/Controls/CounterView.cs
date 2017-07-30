@@ -41,12 +41,25 @@ namespace LpricharCodeHour.Controls
             }
         }
 
-        public async Task Pulse()
+        public async Task Pulse(float duration)
         {
-            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", .5f, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
-            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", .5f, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
-            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", 0f, 1f, 0f, CAMediaTimingFunction.Linear);
-            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", 0f, 1f, 0f, CAMediaTimingFunction.Linear);
+            var halfDuration = duration / 2;
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", halfDuration, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", halfDuration, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
+            await ResetLayer();
+        }
+
+        /// <summary>
+        /// Resetting the strokeEnd and strokeStart is a little tricky since it will animate
+        /// to the values you set it to if you aren't careful and that looks bad
+        /// </summary>
+        /// <returns></returns>
+        private async Task ResetLayer()
+        {
+            _layer.Opacity = 0f;
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", .01f, 1f, 0f, CAMediaTimingFunction.Linear);
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", .01f, 1f, 0f, CAMediaTimingFunction.Linear);
+            _layer.Opacity = 1f;
         }
     }
 }
