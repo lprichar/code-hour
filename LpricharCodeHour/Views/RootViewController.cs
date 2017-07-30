@@ -28,7 +28,7 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
-            _initiatingLabel = AddLabel(this, "initiating lprichar code hour", 20);
+            _initiatingLabel = AddLabel(this, "", 20);
             _counterLabel = AddLabel(this, "", 40);
 
             _counterView = AddCounterView(this);
@@ -73,7 +73,7 @@ namespace LpricharCodeHour.Views
 
         private async Task StartCountdownAnim()
         {
-            for (int i = 9; i >= 0; i--)
+            for (int i = 3; i >= 0; i--)
             {
                 var isOdd = i % 2 == 1;
 
@@ -100,10 +100,14 @@ namespace LpricharCodeHour.Views
         {
             try
             {
+                ResetEverything();
+                await Task.Delay(500);
                 while (true)
                 {
+                    await TypeInitiate();
+                    await Task.Delay(500);
                     await StartCountdownAnim();
-                    _counterLabel.Text = "";
+                    ResetEverything();
                     await Task.Delay(3000);
                 }
             }
@@ -111,6 +115,35 @@ namespace LpricharCodeHour.Views
             {
                 Console.WriteLine("Error in animation " + ex);
             }
+        }
+
+        private void ResetEverything()
+        {
+            _counterLabel.Text = "";
+            _initiatingLabel.Text = "Lees-iPadPro$ ";
+        }
+
+        private async Task TypeInitiate()
+        {
+            var duration = 200;
+            await AppendInitiateCharacter("i", duration / 2);
+            await AppendInitiateCharacter("n", duration / 2);
+            await AppendInitiateCharacter("i", duration / 2);
+            await AppendInitiateCharacter("t", duration);
+            await AppendInitiateCharacter("iate ", duration * 2);
+            await AppendInitiateCharacter("'", duration);
+            await AppendInitiateCharacter("l", duration);
+            await AppendInitiateCharacter("p", duration);
+            await AppendInitiateCharacter("r", duration);
+            await AppendInitiateCharacter("i", duration);
+            await AppendInitiateCharacter("char code hour'", duration);
+            //initiate 'lprichar code hour'
+        }
+
+        private async Task AppendInitiateCharacter(string str, int duration)
+        {
+            _initiatingLabel.Text += str;
+            await Task.Delay(duration);
         }
     }
 
