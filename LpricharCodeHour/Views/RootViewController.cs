@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UIKit;
 using Foundation;
 using LpricharCodeHour.Controls;
@@ -6,13 +7,12 @@ using LpricharCodeHour.Utils;
 
 namespace LpricharCodeHour.Views
 {
-    [Register("UniversalView")]
-    public class UniversalView : UIView
+    public class RootView : UIView
     {
         private UILabel _label;
         private CounterView _counterView;
 
-        public UniversalView()
+        public RootView()
         {
             Initialize();
             AddViews();
@@ -64,20 +64,43 @@ namespace LpricharCodeHour.Views
                 && _counterView.Frame.Width == 100
             );
         }
+
+        public async void StartAnimation()
+        {
+            try
+            {
+                while (true)
+                {
+                    await Task.WhenAll(
+                        _counterView.Pulse(),
+                        Task.Delay(2000)
+                        );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in animation " + ex);
+            }
+        }
     }
 
     [Register("RootViewController")]
     public class RootViewController : UIViewController
     {
-        public RootViewController()
-        {
-        }
+        private RootView _rootView;
 
         public override void ViewDidLoad()
         {
-            View = new UniversalView();
+            _rootView = new RootView();
+            View = _rootView;
 
             base.ViewDidLoad();
+        }
+
+        public override void ViewDidAppear(bool animated)
+        {
+            base.ViewDidAppear(animated);
+            _rootView.StartAnimation();
         }
     }
 }

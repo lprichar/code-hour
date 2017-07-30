@@ -1,5 +1,8 @@
-﻿using CoreAnimation;
+﻿using System.Threading.Tasks;
+using CoreAnimation;
 using CoreGraphics;
+using Foundation;
+using LpricharCodeHour.Utils;
 using UIKit;
 
 namespace LpricharCodeHour.Controls
@@ -20,7 +23,8 @@ namespace LpricharCodeHour.Controls
             {
                 FillColor = UIColor.Clear.CGColor,
                 StrokeColor = UIColor.White.CGColor,
-                LineWidth = 2f
+                LineWidth = 2f,
+                StrokeEnd = 0
             };
             Layer.AddSublayer(shapeLayer);
             return shapeLayer;
@@ -35,6 +39,14 @@ namespace LpricharCodeHour.Controls
                 var cgpath = oval.CGPath;
                 _layer.Path = cgpath;
             }
+        }
+
+        public async Task Pulse()
+        {
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", .5f, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", .5f, 0f, 1f, CAMediaTimingFunction.EaseInEaseOut);
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeEnd", 0f, 1f, 0f, CAMediaTimingFunction.Linear);
+            await AnimationUtils.BasicAnimationAsync(_layer, "strokeStart", 0f, 1f, 0f, CAMediaTimingFunction.Linear);
         }
     }
 }
