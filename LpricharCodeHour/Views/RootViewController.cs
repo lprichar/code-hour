@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CoreGraphics;
 using UIKit;
 using Foundation;
 using LpricharCodeHour.Controls;
@@ -12,6 +13,8 @@ namespace LpricharCodeHour.Views
         private UILabel _initiatingLabel;
         private CounterView _counterView;
         private UILabel _counterLabel;
+        private UIImageView _watchImageView;
+        private UIImage _watch;
 
         public RootView()
         {
@@ -30,9 +33,23 @@ namespace LpricharCodeHour.Views
         {
             _initiatingLabel = AddLabel(this, "", 20);
             _counterLabel = AddLabel(this, "", 40);
-
+            _watch = UIImage.FromBundle("Watch");
+            _watchImageView = AddImageView(this, _watch);
             _counterView = AddCounterView(this);
         }
+
+        private static UIImageView AddImageView(UIView parent, UIImage image)
+        {
+            var imageView = new UIImageView
+            {
+                Image = image,
+                Alpha = 0,
+                BackgroundColor = UIColor.Clear
+            };
+            parent.AddSubview(imageView);
+            return imageView;
+        }
+
 
         private static CounterView AddCounterView(UIView parent)
         {
@@ -40,7 +57,6 @@ namespace LpricharCodeHour.Views
             parent.AddSubview(counterView);
             return counterView;
         }
-
 
         private static UILabel AddLabel(UIView parent, string text, nfloat fontSize)
         {
@@ -68,6 +84,9 @@ namespace LpricharCodeHour.Views
 
                 && _counterLabel.Frame.GetCenterX() == _counterView.Frame.GetCenterX()
                 && _counterLabel.Frame.GetCenterY() == _counterView.Frame.GetCenterY()
+
+                && _watchImageView.Frame.GetCenterY() == Frame.GetCenterY()
+                && _watchImageView.Frame.GetCenterX() == Frame.GetCenterX() + 200
             );
         }
 
@@ -108,6 +127,8 @@ namespace LpricharCodeHour.Views
                     await Task.Delay(500);
                     await StartCountdownAnim();
                     ResetEverything();
+                    await ZoomWatch();
+
                     await Task.Delay(3000);
                 }
             }
@@ -117,10 +138,22 @@ namespace LpricharCodeHour.Views
             }
         }
 
+        private async Task ZoomWatch()
+        {
+            _watchImageView.Alpha = 1;
+            await UIView.AnimateNotifyAsync(1f, 0, UIViewAnimationOptions.CurveEaseOut, () =>
+            {
+                var zoomBackTo = .2f;
+                _watchImageView.Transform = CGAffineTransform.MakeScale(zoomBackTo, zoomBackTo);
+            });
+        }
+
         private void ResetEverything()
         {
             _counterLabel.Text = "";
             _initiatingLabel.Text = "Lees-iPadPro$ ";
+            _watchImageView.Alpha = 0;
+            _watchImageView.Transform = CGAffineTransform.MakeScale(6f, 6f);
         }
 
         private async Task TypeInitiate()
