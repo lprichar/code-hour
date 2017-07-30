@@ -28,8 +28,8 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
-            _initiatingLabel = AddLabel(this, "initiating lprichar code hour" + Environment.NewLine + "t minus");
-            _counterLabel = AddLabel(this, "");
+            _initiatingLabel = AddLabel(this, "initiating lprichar code hour", 20);
+            _counterLabel = AddLabel(this, "", 40);
 
             _counterView = AddCounterView(this);
         }
@@ -42,14 +42,15 @@ namespace LpricharCodeHour.Views
         }
 
 
-        private static UILabel AddLabel(UIView parent, string text)
+        private static UILabel AddLabel(UIView parent, string text, nfloat fontSize)
         {
             var label = new UILabel
             {
                 Text = text,
                 Lines = 0,
-                TextColor = UIColor.White
+                TextColor = UIColor.White,
             };
+            label.Font = label.Font.WithSize(fontSize);
             parent.AddSubview(label);
             return label;
         }
@@ -76,7 +77,7 @@ namespace LpricharCodeHour.Views
             {
                 var isOdd = i % 2 == 1;
 
-                _counterLabel.Text = i.ToString();
+                FadeShow(i);
 
                 if (isOdd)
                 {
@@ -85,6 +86,14 @@ namespace LpricharCodeHour.Views
                 }
                 await Task.Delay(1000);
             }
+        }
+
+        private async Task FadeShow(int i)
+        {
+            _counterLabel.Text = i.ToString();
+            await UIView.AnimateAsync(.1f, () => _counterLabel.Alpha = 1);
+            await Task.Delay(800);
+            await UIView.AnimateAsync(.1f, () => _counterLabel.Alpha = 0);
         }
 
         public async void StartAnimation()
