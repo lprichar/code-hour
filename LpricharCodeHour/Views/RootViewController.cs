@@ -133,28 +133,32 @@ namespace LpricharCodeHour.Views
             await UIView.AnimateAsync(.1f, () => _counterLabel.Alpha = 0);
         }
 
-        public async void StartAnimation()
+        private bool _animationInProgress = false;
+
+        public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {
+            base.TouchesEnded(touches, evt);
+            if (_animationInProgress) return;
+            _animationInProgress = true;
             try
             {
-                ResetEverything();
+                await TypeInitiate();
                 await Task.Delay(500);
-                while (true)
-                {
-                    await TypeInitiate();
-                    await Task.Delay(500);
-                    await StartCountdownAnim();
-                    await ZoomWatch();
-                    await ShowLpricharShowText();
+                await StartCountdownAnim();
+                await ZoomWatch();
+                await ShowLpricharShowText();
 
-                    await Task.Delay(3000);
-                    ResetEverything();
-                    await Task.Delay(5000);
-                }
+                await Task.Delay(3000);
+                ResetEverything();
+                await Task.Delay(5000);
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error in animation " + ex);
+            }
+            finally
+            {
+                _animationInProgress = false;
             }
         }
 
@@ -162,7 +166,7 @@ namespace LpricharCodeHour.Views
         {
             _lpricharLabel.Alpha = 0;
             _codeHourLabel.Alpha = 0;
-            await UIView.AnimateAsync(.5f, () =>
+            await AnimateAsync(.5f, () =>
             {
                 _lpricharLabel.Alpha = 1;
                 _codeHourLabel.Alpha = 1;
@@ -172,14 +176,14 @@ namespace LpricharCodeHour.Views
         private async Task ZoomWatch()
         {
             _watchImageView.Alpha = 1;
-            await UIView.AnimateNotifyAsync(1f, 0, UIViewAnimationOptions.CurveEaseOut, () =>
+            await AnimateNotifyAsync(1f, 0, UIViewAnimationOptions.CurveEaseOut, () =>
             {
                 var zoomBackTo = .2f;
                 _watchImageView.Transform = CGAffineTransform.MakeScale(zoomBackTo, zoomBackTo);
             });
         }
 
-        private void ResetEverything()
+        public void ResetEverything()
         {
             _counterLabel.Text = "";
             _initiatingLabel.Text = "Lees-iPadPro$ ";
@@ -229,7 +233,7 @@ namespace LpricharCodeHour.Views
         public override void ViewDidAppear(bool animated)
         {
             base.ViewDidAppear(animated);
-            _rootView.StartAnimation();
+            _rootView.ResetEverything();
         }
     }
 }
