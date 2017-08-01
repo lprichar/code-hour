@@ -216,10 +216,11 @@ namespace LpricharCodeHour.Views
 
         private async Task ZoomWatch()
         {
-            _watchImageView.Alpha = 1;
-            await AnimateNotifyAsync(1f, 0, UIViewAnimationOptions.CurveEaseOut, () =>
+            _watchImageView.Alpha = 0;
+            var zoomBackTo = .2f;
+            await AnimateNotifyAsync(.6f, 0, UIViewAnimationOptions.CurveEaseOut, () =>
             {
-                var zoomBackTo = .2f;
+                _watchImageView.Alpha = 1;
                 _watchImageView.Transform = CGAffineTransform.MakeScale(zoomBackTo, zoomBackTo);
             });
         }
