@@ -172,15 +172,13 @@ namespace LpricharCodeHour.Views
                 _row1Cursor.Stop();
                 await TypeInitiate();
                 MakeRowActive(1);
-                HideAfter(1500, _row2Cursor).FireAndForget();
+                HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
                 await Task.Delay(500);
                 await StartCountdownAnim();
                 await ZoomWatch();
                 await ShowLpricharShowText();
-
-                await Task.Delay(3000);
-                ResetEverything();
                 await Task.Delay(5000);
+                ResetEverything();
             }
             catch (Exception ex)
             {
@@ -192,10 +190,17 @@ namespace LpricharCodeHour.Views
             }
         }
 
-        private async Task HideAfter(int duration, UIView view)
+        private async Task HideAfter(int duration, params UIView[] views)
         {
             await Task.Delay(duration);
-            view.Hidden = true;
+            foreach (var view in views)
+            {
+                view.Alpha = 1;
+                Animate(1, () =>
+                {
+                    view.Alpha = 0;
+                });
+            }
         }
 
         private async Task ShowLpricharShowText()
@@ -223,14 +228,14 @@ namespace LpricharCodeHour.Views
         {
             _counterLabel.Text = "";
             _initiatingLabel.Text = "Lees-iPadPro$ ";
+            _initiatingLabel.Alpha = 1;
             _watchImageView.Alpha = 0;
             _watchImageView.Transform = CGAffineTransform.MakeScale(6f, 6f);
             _lpricharLabel.Alpha = 0;
             _codeHourLabel.Alpha = 0;
             MakeRowActive(0);
             _row1Cursor.Start();
-            _row1Cursor.Hidden = false;
-            _row2Cursor.Hidden = true;
+            _row2Cursor.Alpha = 1;
         }
 
         private void MakeRowActive(int i)
