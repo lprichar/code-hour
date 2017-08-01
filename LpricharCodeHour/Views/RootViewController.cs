@@ -17,6 +17,8 @@ namespace LpricharCodeHour.Views
         private UIImage _watch;
         private UILabel _lpricharLabel;
         private UILabel _codeHourLabel;
+        private BlinkySquareView _row1Cursor;
+        private BlinkySquareView _row2Cursor;
 
         public RootView()
         {
@@ -41,7 +43,17 @@ namespace LpricharCodeHour.Views
             AddLpricharLabel();
             _codeHourLabel = AddLabel(this, "code hour", 60);
             _codeHourLabel.Alpha = 0f;
+            _row1Cursor = AddBlinkySquareView(this);
+            _row2Cursor = AddBlinkySquareView(this);
         }
+
+        private static BlinkySquareView AddBlinkySquareView(UIView parent)
+        {
+            var blinkySquareView = new BlinkySquareView();
+            parent.AddSubview(blinkySquareView);
+            return blinkySquareView;
+        }
+
 
         private void AddLpricharLabel()
         {
@@ -88,6 +100,16 @@ namespace LpricharCodeHour.Views
             this.ConstrainLayout(() =>
                 _initiatingLabel.Frame.Top == Frame.Top + 50
                 && _initiatingLabel.Frame.Left == Frame.Left + 10
+
+                && _row1Cursor.Frame.Left == _initiatingLabel.Frame.Right + 1
+                && _row1Cursor.Frame.Top == _initiatingLabel.Frame.Top
+                && _row1Cursor.Frame.Bottom == _initiatingLabel.Frame.Bottom
+                && _row1Cursor.Frame.Width == 10
+
+                && _row2Cursor.Frame.Left == _initiatingLabel.Frame.Left
+                && _row2Cursor.Frame.Top == _initiatingLabel.Frame.Bottom + 10
+                && _row2Cursor.Frame.Height == _initiatingLabel.Frame.Height
+                && _row2Cursor.Frame.Width == _row1Cursor.Frame.Width
 
                 && _counterView.Frame.GetCenterX() == Frame.GetCenterX()
                 && _counterView.Frame.GetCenterY() == Frame.GetCenterY()
@@ -138,11 +160,19 @@ namespace LpricharCodeHour.Views
         public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {
             base.TouchesEnded(touches, evt);
+            await AnimateOnce();
+        }
+
+        private async Task AnimateOnce()
+        {
             if (_animationInProgress) return;
             _animationInProgress = true;
             try
             {
+                _row1Cursor.Stop();
                 await TypeInitiate();
+                MakeRowActive(1);
+                HideAfter(1500, _row2Cursor).FireAndForget();
                 await Task.Delay(500);
                 await StartCountdownAnim();
                 await ZoomWatch();
@@ -160,6 +190,12 @@ namespace LpricharCodeHour.Views
             {
                 _animationInProgress = false;
             }
+        }
+
+        private async Task HideAfter(int duration, UIView view)
+        {
+            await Task.Delay(duration);
+            view.Hidden = true;
         }
 
         private async Task ShowLpricharShowText()
@@ -191,6 +227,16 @@ namespace LpricharCodeHour.Views
             _watchImageView.Transform = CGAffineTransform.MakeScale(6f, 6f);
             _lpricharLabel.Alpha = 0;
             _codeHourLabel.Alpha = 0;
+            MakeRowActive(0);
+            _row1Cursor.Start();
+            _row1Cursor.Hidden = false;
+            _row2Cursor.Hidden = true;
+        }
+
+        private void MakeRowActive(int i)
+        {
+            _row1Cursor.Hidden = i != 0;
+            _row2Cursor.Hidden = i == 0;
         }
 
         private async Task TypeInitiate()
