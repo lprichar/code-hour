@@ -11,6 +11,7 @@ namespace LpricharCodeHour.Views
     public class RootView : UIView
     {
         private UILabel _initiatingLabel;
+        private UIView _codeHourFrame;
         private CounterView _counterView;
         private UILabel _counterLabel;
         private UIImageView _watchImageView;
@@ -35,6 +36,7 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
+            _codeHourFrame = AddView(this);
             _initiatingLabel = AddLabel(this, "", 20);
             _counterLabel = AddLabel(this, "", 40);
             _watch = UIImage.FromBundle("Watch");
@@ -46,6 +48,14 @@ namespace LpricharCodeHour.Views
             _row1Cursor = AddBlinkySquareView(this);
             _row2Cursor = AddBlinkySquareView(this);
         }
+
+        private static UIView AddView(UIView parent)
+        {
+            var view = new UIView();
+            parent.AddSubview(view);
+            return view;
+        }
+
 
         private static BlinkySquareView AddBlinkySquareView(UIView parent)
         {
@@ -127,6 +137,11 @@ namespace LpricharCodeHour.Views
 
                 && _codeHourLabel.Frame.Top == Frame.GetCenterY() + 15
                 && _codeHourLabel.Frame.Right == _lpricharLabel.Frame.Right
+
+                && _codeHourFrame.Frame.Top == _lpricharLabel.Frame.Top - 60
+                && _codeHourFrame.Frame.Left == _codeHourLabel.Frame.Left - 30
+                && _codeHourFrame.Frame.Right == _lpricharLabel.Frame.Right + 280
+                && _codeHourFrame.Frame.Bottom == _codeHourLabel.Frame.Bottom + 65
             );
         }
 
@@ -175,6 +190,8 @@ namespace LpricharCodeHour.Views
                 HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
                 await Task.Delay(500);
                 await StartCountdownAnim();
+                //_counterView.Frame = _codeHourFrame.Frame;
+                //_counterView.AnimateToSquare();
                 await ZoomWatch();
                 await ShowLpricharShowText();
                 await Task.Delay(5000);
@@ -228,6 +245,7 @@ namespace LpricharCodeHour.Views
         public void ResetEverything()
         {
             _counterLabel.Text = "";
+            _counterView.ResetToCircle();
             _initiatingLabel.Text = "Lees-iPadPro$ ";
             _initiatingLabel.Alpha = 1;
             _watchImageView.Alpha = 0;

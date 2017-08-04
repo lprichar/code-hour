@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using CoreAnimation;
 using CoreGraphics;
-using Foundation;
 using LpricharCodeHour.Utils;
 using UIKit;
 
@@ -9,7 +8,14 @@ namespace LpricharCodeHour.Controls
 {
     public sealed class CounterView : UIView
     {
+        private enum CounterState
+        {
+            Circle,
+            Square
+        }
+
         private readonly CAShapeLayer _layer;
+        private CounterState _counterState;
 
         public CounterView()
         {
@@ -30,15 +36,54 @@ namespace LpricharCodeHour.Controls
             return shapeLayer;
         }
 
-        public override void Draw(CGRect rect)
+        public override async void Draw(CGRect rect)
         {
             base.Draw(rect);
 
-            using (var oval = UIBezierPath.FromOval(rect))
+            if (_counterState == CounterState.Circle)
             {
-                var cgpath = oval.CGPath;
-                _layer.Path = cgpath;
+                using (var oval = UIBezierPath.FromOval(rect))
+                {
+                    _layer.Path = oval.CGPath;
+                }
             }
+            else if (_counterState == CounterState.Square)
+            {
+                var duration = 1f;
+                using (var path = GetSquarePath(rect))
+                {
+                    await AnimatePathTo(_layer, duration, path);
+                }
+            }
+        }
+
+        private async Task AnimatePathTo(CAShapeLayer shapeLayer, float duration, UIBezierPath toBezierPath)
+        {
+            var fromCgPath = FromObject(shapeLayer.Path);
+            var toCgPath = FromObject(toBezierPath.CGPath);
+
+            shapeLayer.Path = toBezierPath.CGPath;
+            await AnimationUtils.BasicAnimationAsync(shapeLayer, "path", duration, fromCgPath, toCgPath, CAMediaTimingFunction.EaseInEaseOut);
+        }
+
+        private UIBezierPath GetSquarePath(CGRect containerRect)
+        {
+            return UIBezierPath.FromRect(containerRect);
+        }
+
+        public void ResetToCircle()
+        {
+            _counterState = CounterState.Circle;
+            // aka goto Draw()
+            SetNeedsDisplay();
+        }
+
+        public void AnimateToSquare()
+        {
+            _layer.StrokeEnd = 1f;
+            _counterState = CounterState.Square;
+            // aka goto Draw()
+            SetNeedsDisplay();
         }
 
         public async Task Pulse(float duration)
