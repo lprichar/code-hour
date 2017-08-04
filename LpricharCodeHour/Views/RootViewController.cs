@@ -47,6 +47,14 @@ namespace LpricharCodeHour.Views
             _codeHourLabel.Alpha = 0f;
             _row1Cursor = AddBlinkySquareView(this);
             _row2Cursor = AddBlinkySquareView(this);
+            _mainCodeStringView = AddCodeStringView(this);
+        }
+
+        private static CodeStringView AddCodeStringView(UIView parent)
+        {
+            var codeStringView = new CodeStringView();
+            parent.AddSubview(codeStringView);
+            return codeStringView;
         }
 
         private static UIView AddView(UIView parent)
@@ -142,6 +150,11 @@ namespace LpricharCodeHour.Views
                 && _codeHourFrame.Frame.Left == _codeHourLabel.Frame.Left - 30
                 && _codeHourFrame.Frame.Right == _lpricharLabel.Frame.Right + 280
                 && _codeHourFrame.Frame.Bottom == _codeHourLabel.Frame.Bottom + 65
+
+                && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
+                && _mainCodeStringView.Frame.Width == 50
+                && _mainCodeStringView.Frame.Top == Frame.Top
+                && _mainCodeStringView.Frame.Bottom == Frame.Bottom
             );
         }
 
@@ -171,6 +184,7 @@ namespace LpricharCodeHour.Views
         }
 
         private bool _animationInProgress = false;
+        private CodeStringView _mainCodeStringView;
 
         public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {
