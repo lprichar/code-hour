@@ -198,16 +198,18 @@ namespace LpricharCodeHour.Views
             _animationInProgress = true;
             try
             {
-                _row1Cursor.Stop();
-                await TypeInitiate();
-                MakeRowActive(1);
-                HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
-                await Task.Delay(500);
-                await StartCountdownAnim();
+                _mainCodeStringView.StartAnimation();
+
+                //_row1Cursor.Stop();
+                //await TypeInitiate();
+                //MakeRowActive(1);
+                //HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
+                //await Task.Delay(500);
+                //await StartCountdownAnim();
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();
-                await ZoomWatch();
-                await ShowLpricharShowText();
+                //await ZoomWatch();
+                //await ShowLpricharShowText();
                 await Task.Delay(5000);
                 ResetEverything();
             }
