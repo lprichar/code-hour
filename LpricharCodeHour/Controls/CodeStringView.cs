@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using LpricharCodeHour.Utils;
 using UIKit;
 
@@ -31,20 +32,22 @@ namespace LpricharCodeHour.Controls
 
         private void AddViews()
         {
-            _uiLabel = AddLabel(this);
+            var baseStr = "if (_inProgress) return true; try { _row.Stop(); } catch (Exception ex) { Console.Write(\"Error in animation \" + ex); } this.ConstrainLayout(() => view.Frame.Top == Frame.Top + 50);";
+            var codeText = baseStr.ToCharArray().Take(16);
+            var str = string.Join(Environment.NewLine, codeText);
+            _uiLabel = AddLabel(this, str);
         }
 
-
-        private static UILabel AddLabel(UIView parent)
+        private static UILabel AddLabel(UIView parent, string str)
         {
             var label = new UILabel();
             parent.AddSubview(label);
-            char[] codeText = "if (_animationInProgress) return; try { _row1Cursor.Stop(); } catch (Exception ex) { Console.WriteLine(\"Error in animation \" + ex); } ".ToCharArray();
-            var str = string.Join(Environment.NewLine, codeText);
             label.Text = str;
             label.Lines = 0;
             label.TextColor = UIColor.FromRGB(115, 238, 138);
             label.LineBreakMode = UILineBreakMode.Clip;
+            label.Font = UIFont.FromName(label.Font.Name, 26f);
+            label.TextAlignment = UITextAlignment.Center;
 
             return label;
         }
