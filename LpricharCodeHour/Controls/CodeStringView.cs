@@ -7,11 +7,6 @@ using UIKit;
 
 namespace LpricharCodeHour.Controls
 {
-    public class Hi
-    {
-        
-    }
-
     public class CodeStringView : UIView
     {
         private UILabel _uiLabel;
@@ -31,32 +26,40 @@ namespace LpricharCodeHour.Controls
             );
         }
 
-        private static Random rnd = new Random(47);
+        private static readonly Random Rnd = new Random(47);
+        private bool _animationRunning = false;
 
-        private const string baseStr = "if (_inProgress) return true; try { _row.Stop(); } catch (Exception ex) { Console.Write(\"Error in animation \" + ex); } this.ConstrainLayout(() => view.Frame.Top == Frame.Top + 50);";
+        private const string BaseStr = "if (_inProgress) return true; try { _row.Stop(); } catch (Exception ex) { Console.Write(\"Error in animation \" + ex); } this.ConstrainLayout(() => view.Frame.Top == Frame.Top + 50);";
 
         private void AddViews()
         {
             const int charsInString = 26;
-            var startChar = rnd.Next(0, baseStr.Length - charsInString - 1);
-            var codeText = baseStr.ToCharArray().Skip(startChar).Take(charsInString);
+            var startChar = Rnd.Next(0, BaseStr.Length - charsInString - 1);
+            var codeText = BaseStr.ToCharArray().Skip(startChar).Take(charsInString);
             var str = string.Join(Environment.NewLine, codeText);
             _uiLabel = AddLabel(this, str);
         }
 
         public async void StartAnimation()
         {
+            if (_animationRunning) return;
+            _animationRunning = true;
             var nsMutableAttributedString = (NSMutableAttributedString)_uiLabel.AttributedText;
-            while (true)
+            while (_animationRunning)
             {
-                var charToReplace = rnd.Next(0, _uiLabel.Text.Length);
+                var charToReplace = Rnd.Next(0, _uiLabel.Text.Length);
                 if (_uiLabel.Text[charToReplace] == '\n') charToReplace--;
-                var newChar = baseStr[rnd.Next(0, baseStr.Length - 1)];
+                var newChar = BaseStr[Rnd.Next(0, BaseStr.Length - 1)];
                 nsMutableAttributedString.Replace(new NSRange(charToReplace, 1), newChar.ToString());
                 _uiLabel.Text = nsMutableAttributedString.Value;
                 _uiLabel.AttributedText = nsMutableAttributedString;
-                await Task.Delay(500);
+                await Task.Delay(100);
             }
+        }
+
+        public void StopAnimation()
+        {
+            _animationRunning = false;
         }
 
         private static UILabel AddLabel(UIView parent, string str)
@@ -119,5 +122,10 @@ namespace LpricharCodeHour.Controls
             return label;
         }
 
+        public nfloat GetTextHeight()
+        {
+            _uiLabel.SizeToFit();
+            return _uiLabel.Frame.Height;
+        }
     }
 }

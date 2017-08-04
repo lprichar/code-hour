@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CoreGraphics;
 using UIKit;
@@ -153,9 +154,11 @@ namespace LpricharCodeHour.Views
 
                 && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
                 && _mainCodeStringView.Frame.Width == 50
-                && _mainCodeStringView.Frame.Top == Frame.Top
-                && _mainCodeStringView.Frame.Bottom == Frame.Bottom
+                && _mainCodeStringView.Frame.Bottom == Frame.Top
             );
+
+            _mainCodeStringViewBottomConstraint = Constraints.First(i => i.FirstItem == _mainCodeStringView &&
+                                        i.FirstAttribute == NSLayoutAttribute.Bottom);
         }
 
         private async Task StartCountdownAnim()
@@ -185,6 +188,7 @@ namespace LpricharCodeHour.Views
 
         private bool _animationInProgress = false;
         private CodeStringView _mainCodeStringView;
+        private NSLayoutConstraint _mainCodeStringViewBottomConstraint;
 
         public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {
@@ -199,6 +203,12 @@ namespace LpricharCodeHour.Views
             try
             {
                 _mainCodeStringView.StartAnimation();
+
+                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight();
+                AnimateNotify(4f, 0, UIViewAnimationOptions.CurveLinear, () =>
+                {
+                    LayoutIfNeeded();
+                }, null);
 
                 //_row1Cursor.Stop();
                 //await TypeInitiate();
@@ -271,6 +281,8 @@ namespace LpricharCodeHour.Views
             MakeRowActive(0);
             _row1Cursor.Start();
             _row2Cursor.Alpha = 1;
+            _mainCodeStringView.StopAnimation();
+            _mainCodeStringViewBottomConstraint.Constant = 0;
         }
 
         private void MakeRowActive(int i)
