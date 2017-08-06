@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreGraphics;
@@ -11,6 +12,72 @@ namespace LpricharCodeHour.Views
 {
     public class RootView : UIView
     {
+        class CodeStringCoordinator
+        {
+            class CodeStringMeta
+            {
+                public CodeStringMeta(CodeStringView codeStringView, int column, NSLayoutConstraint layoutConstraint)
+                {
+                    CodeStringView = codeStringView;
+                    Column = column;
+                    LayoutConstraint = layoutConstraint;
+                }
+
+                CodeStringView CodeStringView { get; }
+                int Column { get; }
+                NSLayoutConstraint LayoutConstraint { get; }
+            }
+
+            private readonly List<CodeStringMeta> AllCodeStrings = new List<CodeStringMeta>();
+            public nfloat TextWidth { private get; set; }
+
+            public CodeStringView AddToRightOf(int column, CodeStringView relativeView, UIView parent)
+            {
+                var codeStringView = AddCodeStringView(parent);
+                parent.ConstrainLayout(() =>
+                    codeStringView.Frame.Left == relativeView.Frame.Right + CodeStringMargin
+                );
+
+                return ConstrainAndAddToMeta(column, parent, codeStringView);
+            }
+
+            public CodeStringView AddToLeftOf(int column, CodeStringView relativeView, UIView parent)
+            {
+                var codeStringView = AddCodeStringView(parent);
+                parent.ConstrainLayout(() =>
+                    codeStringView.Frame.Right == relativeView.Frame.Left - CodeStringMargin
+                );
+
+                return ConstrainAndAddToMeta(column, parent, codeStringView);
+            }
+
+            private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
+            {
+                AddWidthConstraint(parent, codeStringView);
+                var bottomConstraint = AddBottomConstraint(parent, codeStringView);
+                var codeStringMeta = new CodeStringMeta(codeStringView, column, bottomConstraint);
+                AllCodeStrings.Add(codeStringMeta);
+                return codeStringView;
+            }
+
+            private void AddWidthConstraint(UIView parent, CodeStringView codeStringView)
+            {
+                parent.AddConstraint(NSLayoutConstraint.Create(codeStringView, NSLayoutAttribute.Width, NSLayoutRelation.Equal, 1, TextWidth));
+            }
+
+            private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView rightCodeStringView)
+            {
+                var bottomConstraint = NSLayoutConstraint.Create(
+                    rightCodeStringView, NSLayoutAttribute.Bottom,
+                    NSLayoutRelation.Equal, 
+                    parent, NSLayoutAttribute.Bottom, 
+                    1, 0);
+                parent.AddConstraint(bottomConstraint);
+                return bottomConstraint;
+            }
+        }
+
+        const float CodeStringMargin = 4f;
         private UILabel _initiatingLabel;
         private UIView _codeHourFrame;
         private CounterView _counterView;
@@ -21,6 +88,7 @@ namespace LpricharCodeHour.Views
         private UILabel _codeHourLabel;
         private BlinkySquareView _row1Cursor;
         private BlinkySquareView _row2Cursor;
+        private readonly CodeStringCoordinator _codeStringCoordinator = new CodeStringCoordinator();
 
         public RootView()
         {
@@ -33,31 +101,18 @@ namespace LpricharCodeHour.Views
         private void AddRemainingCodeStrings()
         {
             LayoutIfNeeded();
-            const float margin = 4f;
             var textWidth = _mainCodeStringView.GetTextWidth();
             var screenWidth = UIScreen.MainScreen.Bounds.Width;
             var halfScreenWidth = screenWidth / 2;
-            var linesPerHalfScreen = halfScreenWidth / (textWidth + margin);
+            var linesPerHalfScreen = halfScreenWidth / (textWidth + CodeStringMargin);
             var previousLeftCodeStringRow = _mainCodeStringView;
             var previousRightCodeStringRow = _mainCodeStringView;
+            _codeStringCoordinator.TextWidth = textWidth;
             for (int column = 0; column < linesPerHalfScreen; column++)
             {
-                var leftCodeStringView = AddCodeStringView(this);
-                var rightCodeStringView = AddCodeStringView(this);
-                leftCodeStringView.StartAnimation();
-                rightCodeStringView.StartAnimation();
-                this.ConstrainLayout(() =>
-                    leftCodeStringView.Frame.Right == previousLeftCodeStringRow.Frame.Left - margin
-                    && leftCodeStringView.Frame.Width == textWidth
-                    && leftCodeStringView.Frame.Bottom == Frame.Bottom
-                    
-                    && rightCodeStringView.Frame.Left == previousRightCodeStringRow.Frame.Right + margin
-                    && rightCodeStringView.Frame.Width == textWidth
-                    && rightCodeStringView.Frame.Bottom == Frame.Bottom
-                );
-
-                previousLeftCodeStringRow = leftCodeStringView;
-                previousRightCodeStringRow = rightCodeStringView;
+                var oneBasedColumn = column + 1;
+                previousRightCodeStringRow = _codeStringCoordinator.AddToRightOf(oneBasedColumn, previousRightCodeStringRow, this);
+                previousLeftCodeStringRow = _codeStringCoordinator.AddToLeftOf(-oneBasedColumn, previousLeftCodeStringRow, this);
             }
         }
 
