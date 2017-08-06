@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using CoreAnimation;
+using CoreGraphics;
 using Foundation;
 using LpricharCodeHour.Utils;
 using UIKit;
 
 namespace LpricharCodeHour.Controls
 {
-    public class CodeStringView : UIView
+    public sealed class CodeStringView : UIView
     {
         private UILabel _uiLabel;
 
         public CodeStringView()
         {
+            BackgroundColor = UIColor.Clear;
             AddViews();
             ConstrainLayout();
         }
@@ -33,11 +36,33 @@ namespace LpricharCodeHour.Controls
 
         private void AddViews()
         {
+            _uiLabel = MakeUiLabel();
+        }
+
+        public override void Draw(CGRect rect)
+        {
+            base.Draw(rect);
+
+            using (var context = UIGraphics.GetCurrentContext())
+            {
+                nfloat[] colors = {
+                    0f, 1f, 0f, .7f,
+                    0f, 0f, 0f, 0f,
+                };
+                var gradient = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors);
+                var startCenter = new CGPoint(rect.GetCenterX(), rect.Height - 20);
+                var radius = 10;
+                context.DrawRadialGradient(gradient, startCenter, 0, startCenter, radius, CGGradientDrawingOptions.None);
+            }
+        }
+
+        private UILabel MakeUiLabel()
+        {
             const int charsInString = 26;
             var startChar = Rnd.Next(0, BaseStr.Length - charsInString - 1);
             var codeText = BaseStr.ToCharArray().Skip(startChar).Take(charsInString);
             var str = string.Join(Environment.NewLine, codeText);
-            _uiLabel = AddLabel(this, str);
+            return AddLabel(this, str);
         }
 
         public async void StartAnimation()

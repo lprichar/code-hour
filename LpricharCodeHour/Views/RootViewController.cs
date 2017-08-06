@@ -31,6 +31,7 @@ namespace LpricharCodeHour.Views
 
             private readonly List<CodeStringMeta> AllCodeStrings = new List<CodeStringMeta>();
             public nfloat TextWidth { private get; set; }
+            public nfloat TextHeight { private get; set; }
             public CodeStringView CenterCodeString { private get; set; }
 
             public CodeStringView AddToRightOf(int column, CodeStringView relativeView, UIView parent)
@@ -56,10 +57,16 @@ namespace LpricharCodeHour.Views
             private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
             {
                 AddWidthConstraint(parent, codeStringView);
+                AddHeightConstraint(parent, codeStringView);
                 var bottomConstraint = AddBottomConstraint(parent, codeStringView, CenterCodeString, column);
                 var codeStringMeta = new CodeStringMeta(codeStringView, column, bottomConstraint);
                 AllCodeStrings.Add(codeStringMeta);
                 return codeStringView;
+            }
+
+            private void AddHeightConstraint(UIView parent, CodeStringView codeStringView)
+            {
+                parent.AddConstraint(NSLayoutConstraint.Create(codeStringView, NSLayoutAttribute.Height, NSLayoutRelation.Equal, 1, TextHeight));
             }
 
             private void AddWidthConstraint(UIView parent, CodeStringView codeStringView)
@@ -123,6 +130,7 @@ namespace LpricharCodeHour.Views
             var previousLeftCodeStringRow = _mainCodeStringView;
             var previousRightCodeStringRow = _mainCodeStringView;
             _codeStringCoordinator.TextWidth = textWidth;
+            _codeStringCoordinator.TextHeight = _mainCodeStringView.GetTextHeight();
             _codeStringCoordinator.CenterCodeString = _mainCodeStringView;
             for (int column = 0; column < linesPerHalfScreen; column++)
             {
@@ -220,6 +228,7 @@ namespace LpricharCodeHour.Views
         private void ConstrainLayout()
         {
             var textWidth = _mainCodeStringView.GetTextWidth();
+            var textHeight = _mainCodeStringView.GetTextHeight();
 
             this.ConstrainLayout(() =>
                 _initiatingLabel.Frame.Top == Frame.Top + 50
@@ -259,7 +268,8 @@ namespace LpricharCodeHour.Views
 
                 && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
                 && _mainCodeStringView.Frame.Width == textWidth
-                && _mainCodeStringView.Frame.Bottom == Frame.Top
+                && _mainCodeStringView.Frame.Height == textHeight
+                && _mainCodeStringView.Frame.Bottom == Frame.Bottom
             );
 
             _mainCodeStringViewBottomConstraint = Constraints.First(i => i.FirstItem == _mainCodeStringView &&
