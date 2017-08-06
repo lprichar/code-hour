@@ -56,7 +56,7 @@ namespace LpricharCodeHour.Views
             private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
             {
                 AddWidthConstraint(parent, codeStringView);
-                var bottomConstraint = AddBottomConstraint(parent, codeStringView, CenterCodeString);
+                var bottomConstraint = AddBottomConstraint(parent, codeStringView, CenterCodeString, column);
                 var codeStringMeta = new CodeStringMeta(codeStringView, column, bottomConstraint);
                 AllCodeStrings.Add(codeStringMeta);
                 return codeStringView;
@@ -69,27 +69,29 @@ namespace LpricharCodeHour.Views
 
             static readonly Random DistanceFromCenterRandom = new Random(42);
 
-            private static float GetDistanceFromCenter()
+            private static float GetDistanceFromCenter(int column)
             {
-                _maxDistanceFromCenter = 2000;
-                var distanceFromCenter = DistanceFromCenterRandom.Next(400, _maxDistanceFromCenter);
-                return -distanceFromCenter;
+                if (column == 10) return 500;
+                if (column == 3) return 600;
+                if (column == -5) return 620;
+                if (column == 2) return 700;
+                return DistanceFromCenterRandom.Next(800, MaxDistanceFromCenter);
             }
 
-            private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView codeStringView, UIView centerCodeString)
+            private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView codeStringView, UIView centerCodeString, int column)
             {
-                var distanceFromCenter = GetDistanceFromCenter();
+                var distanceFromCenter = GetDistanceFromCenter(column);
                 var bottomConstraint = NSLayoutConstraint.Create(
                     codeStringView, NSLayoutAttribute.Bottom,
                     NSLayoutRelation.Equal,
                     centerCodeString, NSLayoutAttribute.Bottom, 
-                    1, distanceFromCenter);
+                    1, -distanceFromCenter);
                 parent.AddConstraint(bottomConstraint);
                 return bottomConstraint;
             }
         }
 
-        private static int _maxDistanceFromCenter;
+        private const int MaxDistanceFromCenter = 2500;
         const float CodeStringMargin = 4f;
         private UILabel _initiatingLabel;
         private UIView _codeHourFrame;
@@ -307,7 +309,7 @@ namespace LpricharCodeHour.Views
             {
                 _mainCodeStringView.StartAnimation();
 
-                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + _maxDistanceFromCenter;
+                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
                 await AnimateNotifyAsync(8f, 0, UIViewAnimationOptions.CurveLinear, () =>
                 {
                     LayoutIfNeeded();
