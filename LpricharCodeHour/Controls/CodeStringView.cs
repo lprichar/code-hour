@@ -127,5 +127,11 @@ namespace LpricharCodeHour.Controls
             _uiLabel.SizeToFit();
             return _uiLabel.Frame.Height;
         }
+
+        public nfloat GetTextWidth()
+        {
+            _uiLabel.SizeToFit();
+            return _uiLabel.Frame.Width;
+        }
     }
 }

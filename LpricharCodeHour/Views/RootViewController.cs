@@ -27,6 +27,38 @@ namespace LpricharCodeHour.Views
             Initialize();
             AddViews();
             ConstrainLayout();
+            AddRemainingCodeStrings();
+        }
+
+        private void AddRemainingCodeStrings()
+        {
+            LayoutIfNeeded();
+            const float margin = 4f;
+            var textWidth = _mainCodeStringView.GetTextWidth();
+            var screenWidth = UIScreen.MainScreen.Bounds.Width;
+            var halfScreenWidth = screenWidth / 2;
+            var linesPerHalfScreen = halfScreenWidth / (textWidth + margin);
+            var previousLeftCodeStringRow = _mainCodeStringView;
+            var previousRightCodeStringRow = _mainCodeStringView;
+            for (int column = 0; column < linesPerHalfScreen; column++)
+            {
+                var leftCodeStringView = AddCodeStringView(this);
+                var rightCodeStringView = AddCodeStringView(this);
+                leftCodeStringView.StartAnimation();
+                rightCodeStringView.StartAnimation();
+                this.ConstrainLayout(() =>
+                    leftCodeStringView.Frame.Right == previousLeftCodeStringRow.Frame.Left - margin
+                    && leftCodeStringView.Frame.Width == textWidth
+                    && leftCodeStringView.Frame.Bottom == Frame.Bottom
+                    
+                    && rightCodeStringView.Frame.Left == previousRightCodeStringRow.Frame.Right + margin
+                    && rightCodeStringView.Frame.Width == textWidth
+                    && rightCodeStringView.Frame.Bottom == Frame.Bottom
+                );
+
+                previousLeftCodeStringRow = leftCodeStringView;
+                previousRightCodeStringRow = rightCodeStringView;
+            }
         }
 
         void Initialize()
@@ -116,6 +148,8 @@ namespace LpricharCodeHour.Views
 
         private void ConstrainLayout()
         {
+            var textWidth = _mainCodeStringView.GetTextWidth();
+
             this.ConstrainLayout(() =>
                 _initiatingLabel.Frame.Top == Frame.Top + 50
                 && _initiatingLabel.Frame.Left == Frame.Left + 10
@@ -153,7 +187,7 @@ namespace LpricharCodeHour.Views
                 && _codeHourFrame.Frame.Bottom == _codeHourLabel.Frame.Bottom + 65
 
                 && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
-                && _mainCodeStringView.Frame.Width == 50
+                && _mainCodeStringView.Frame.Width == textWidth
                 && _mainCodeStringView.Frame.Bottom == Frame.Top
             );
 
