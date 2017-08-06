@@ -7,6 +7,7 @@ using UIKit;
 using Foundation;
 using LpricharCodeHour.Controls;
 using LpricharCodeHour.Utils;
+using ObjCRuntime;
 
 namespace LpricharCodeHour.Views
 {
@@ -30,6 +31,7 @@ namespace LpricharCodeHour.Views
 
             private readonly List<CodeStringMeta> AllCodeStrings = new List<CodeStringMeta>();
             public nfloat TextWidth { private get; set; }
+            public CodeStringView CenterCodeString { private get; set; }
 
             public CodeStringView AddToRightOf(int column, CodeStringView relativeView, UIView parent)
             {
@@ -54,7 +56,7 @@ namespace LpricharCodeHour.Views
             private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
             {
                 AddWidthConstraint(parent, codeStringView);
-                var bottomConstraint = AddBottomConstraint(parent, codeStringView);
+                var bottomConstraint = AddBottomConstraint(parent, codeStringView, CenterCodeString);
                 var codeStringMeta = new CodeStringMeta(codeStringView, column, bottomConstraint);
                 AllCodeStrings.Add(codeStringMeta);
                 return codeStringView;
@@ -65,18 +67,29 @@ namespace LpricharCodeHour.Views
                 parent.AddConstraint(NSLayoutConstraint.Create(codeStringView, NSLayoutAttribute.Width, NSLayoutRelation.Equal, 1, TextWidth));
             }
 
-            private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView rightCodeStringView)
+            static readonly Random DistanceFromCenterRandom = new Random(42);
+
+            private static float GetDistanceFromCenter()
             {
+                _maxDistanceFromCenter = 2000;
+                var distanceFromCenter = DistanceFromCenterRandom.Next(400, _maxDistanceFromCenter);
+                return -distanceFromCenter;
+            }
+
+            private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView codeStringView, UIView centerCodeString)
+            {
+                var distanceFromCenter = GetDistanceFromCenter();
                 var bottomConstraint = NSLayoutConstraint.Create(
-                    rightCodeStringView, NSLayoutAttribute.Bottom,
-                    NSLayoutRelation.Equal, 
-                    parent, NSLayoutAttribute.Bottom, 
-                    1, 0);
+                    codeStringView, NSLayoutAttribute.Bottom,
+                    NSLayoutRelation.Equal,
+                    centerCodeString, NSLayoutAttribute.Bottom, 
+                    1, distanceFromCenter);
                 parent.AddConstraint(bottomConstraint);
                 return bottomConstraint;
             }
         }
 
+        private static int _maxDistanceFromCenter;
         const float CodeStringMargin = 4f;
         private UILabel _initiatingLabel;
         private UIView _codeHourFrame;
@@ -108,6 +121,7 @@ namespace LpricharCodeHour.Views
             var previousLeftCodeStringRow = _mainCodeStringView;
             var previousRightCodeStringRow = _mainCodeStringView;
             _codeStringCoordinator.TextWidth = textWidth;
+            _codeStringCoordinator.CenterCodeString = _mainCodeStringView;
             for (int column = 0; column < linesPerHalfScreen; column++)
             {
                 var oneBasedColumn = column + 1;
@@ -293,11 +307,11 @@ namespace LpricharCodeHour.Views
             {
                 _mainCodeStringView.StartAnimation();
 
-                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight();
-                AnimateNotify(4f, 0, UIViewAnimationOptions.CurveLinear, () =>
+                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + _maxDistanceFromCenter;
+                await AnimateNotifyAsync(8f, 0, UIViewAnimationOptions.CurveLinear, () =>
                 {
                     LayoutIfNeeded();
-                }, null);
+                });
 
                 //_row1Cursor.Stop();
                 //await TypeInitiate();
