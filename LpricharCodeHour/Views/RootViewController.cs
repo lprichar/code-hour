@@ -37,8 +37,9 @@ namespace LpricharCodeHour.Views
             public CodeStringView AddToRightOf(int column, CodeStringView relativeView, UIView parent)
             {
                 var codeStringView = AddCodeStringView(parent);
+                var pixelsBetweenRows = GetPixelsBetweenRows();
                 parent.ConstrainLayout(() =>
-                    codeStringView.Frame.Left == relativeView.Frame.Right + CodeStringMargin
+                    codeStringView.Frame.Left == relativeView.Frame.Right + pixelsBetweenRows
                 );
 
                 return ConstrainAndAddToMeta(column, parent, codeStringView);
@@ -47,11 +48,17 @@ namespace LpricharCodeHour.Views
             public CodeStringView AddToLeftOf(int column, CodeStringView relativeView, UIView parent)
             {
                 var codeStringView = AddCodeStringView(parent);
+                var pixelsBetweenRows = GetPixelsBetweenRows();
                 parent.ConstrainLayout(() =>
-                    codeStringView.Frame.Right == relativeView.Frame.Left - CodeStringMargin
+                    codeStringView.Frame.Right == relativeView.Frame.Left - pixelsBetweenRows
                 );
 
                 return ConstrainAndAddToMeta(column, parent, codeStringView);
+            }
+
+            private nfloat GetPixelsBetweenRows()
+            {
+                return CodeStringMargin - TextWidth;
             }
 
             private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
@@ -71,7 +78,7 @@ namespace LpricharCodeHour.Views
 
             private void AddWidthConstraint(UIView parent, CodeStringView codeStringView)
             {
-                parent.AddConstraint(NSLayoutConstraint.Create(codeStringView, NSLayoutAttribute.Width, NSLayoutRelation.Equal, 1, TextWidth));
+                parent.AddConstraint(NSLayoutConstraint.Create(codeStringView, NSLayoutAttribute.Width, NSLayoutRelation.Equal, 1, TextWidth * 3));
             }
 
             static readonly Random DistanceFromCenterRandom = new Random(42);
@@ -142,8 +149,7 @@ namespace LpricharCodeHour.Views
 
         void Initialize()
         {
-            var color = 0.1450980392156863f;
-            BackgroundColor = UIColor.FromRGB(color, color, color);
+            BackgroundColor = _backgroundColor;
         }
 
         private void AddViews()
@@ -165,6 +171,7 @@ namespace LpricharCodeHour.Views
         private static CodeStringView AddCodeStringView(UIView parent)
         {
             var codeStringView = new CodeStringView();
+            codeStringView.BackgroundColor = _backgroundColor;
             parent.AddSubview(codeStringView);
             return codeStringView;
         }
@@ -227,7 +234,7 @@ namespace LpricharCodeHour.Views
 
         private void ConstrainLayout()
         {
-            var textWidth = _mainCodeStringView.GetTextWidth();
+            var textWidth = _mainCodeStringView.GetTextWidth() * 3;
             var textHeight = _mainCodeStringView.GetTextHeight();
 
             this.ConstrainLayout(() =>
@@ -269,7 +276,7 @@ namespace LpricharCodeHour.Views
                 && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
                 && _mainCodeStringView.Frame.Width == textWidth
                 && _mainCodeStringView.Frame.Height == textHeight
-                && _mainCodeStringView.Frame.Bottom == Frame.Bottom
+                && _mainCodeStringView.Frame.Bottom == Frame.Top
             );
 
             _mainCodeStringViewBottomConstraint = Constraints.First(i => i.FirstItem == _mainCodeStringView &&
@@ -304,6 +311,8 @@ namespace LpricharCodeHour.Views
         private bool _animationInProgress = false;
         private CodeStringView _mainCodeStringView;
         private NSLayoutConstraint _mainCodeStringViewBottomConstraint;
+        const float BackgroundColorFloat = 0.1450980392156863f;
+        private static readonly UIColor _backgroundColor = UIColor.FromRGB(BackgroundColorFloat, BackgroundColorFloat, BackgroundColorFloat);
 
         public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {

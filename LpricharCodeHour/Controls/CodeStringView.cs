@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using CoreAnimation;
 using CoreGraphics;
 using Foundation;
 using LpricharCodeHour.Utils;
@@ -23,9 +22,8 @@ namespace LpricharCodeHour.Controls
         private void ConstrainLayout()
         {
             this.ConstrainLayout(() =>
-                _uiLabel.Frame.Left == Frame.Left
-                && _uiLabel.Frame.Right == Frame.Right
-                && _uiLabel.Frame.Bottom == Frame.Bottom
+                _uiLabel.Frame.GetCenterX() == Frame.GetCenterX()
+                && _uiLabel.Frame.Bottom == Frame.Bottom - 20
             );
         }
 
@@ -43,16 +41,37 @@ namespace LpricharCodeHour.Controls
         {
             base.Draw(rect);
 
+            nfloat[] colors = {
+                .04f, .54f, .12f, .8f,
+                0, 0, 0, 0,
+            };
+
             using (var context = UIGraphics.GetCurrentContext())
-            {
-                nfloat[] colors = {
-                    0f, 1f, 0f, .7f,
-                    0f, 0f, 0f, 0f,
-                };
-                var gradient = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors);
-                var startCenter = new CGPoint(rect.GetCenterX(), rect.Height - 20);
-                var radius = 10;
-                context.DrawRadialGradient(gradient, startCenter, 0, startCenter, radius, CGGradientDrawingOptions.None);
+            using (var gradient = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors)) { 
+                //var center = new CGPoint(rect.GetCenterX(), rect.Height - 20);
+                //var radius1 = 40;
+
+                /*
+                 * a => xx
+                 * b => yx
+                 * c => xy
+                 * d => yy
+                 * tx => x0
+                 * ty => y0 
+                 */
+
+                CGAffineTransform scaleT = CGAffineTransform.MakeScale(1, 4f);
+                CGAffineTransform invScaleT = CGAffineTransform.CGAffineTransformInvert(scaleT);
+                //// Extract the Sx and Sy elements from the inverse matrix
+                //// (See the Quartz documentation for the math behind the matrices)
+                CGPoint invS = new CGPoint(invScaleT.xx, invScaleT.yy);
+
+                //// Transform center and radius of gradient with the inverse
+                CGPoint center = new CGPoint((rect.Size.Width * .5f) * invS.X, (rect.Size.Height - 75) * invS.Y);
+                var radius = (rect.Size.Width / 2) * invS.X;
+                context.ScaleCTM(scaleT.xx, scaleT.yy);
+                context.DrawRadialGradient(gradient, center, 0, center, radius, CGGradientDrawingOptions.DrawsBeforeStartLocation);
+                context.ScaleCTM(invScaleT.xx, invScaleT.yy);
             }
         }
 
