@@ -41,17 +41,20 @@ namespace LpricharCodeHour.Controls
         {
             base.Draw(rect);
 
+            nfloat red, green, blue, alpha;
+            this.BackgroundColor.GetRGBA(out red, out green, out blue, out alpha);
+
             nfloat[] colors1 = {
-                .12f, .54f, .25f, .9f,
-                0, 0, 0, 0,
+                .25f, .74f, .39f, 1f,
+                red, green, blue, 0,
             };
             nfloat[] colors2 = {
-                .04f, .54f, .12f, .7f,
-                0, 0, 0, 0,
+                .10f, .46f, .18f, 1f,
+                red, green, blue, 0,
             };
             nfloat[] colors3 = {
-                .04f, .54f, .12f, .4f,
-                0, 0, 0, 0,
+                .08f, .34f, .09f, 1f,
+                red, green, blue, 0,
             };
 
             using (var context = UIGraphics.GetCurrentContext())
