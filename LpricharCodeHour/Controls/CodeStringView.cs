@@ -30,7 +30,7 @@ namespace LpricharCodeHour.Controls
         private static readonly Random Rnd = new Random(47);
         private bool _animationRunning = false;
 
-        private const string BaseStr = "if (_inProgress) return true; try { _row.Stop(); } catch (Exception ex) { Console.Write(\"Error in animation \" + ex); } this.ConstrainLayout(() => view.Frame.Top == Frame.Top + 50);";
+        private const string BaseStr = "if(_inProgress)returntrue;try{_row.Stop();}catch(Exceptionex){Console.Write(\"Errorinanimation\"+ex);}this.ConstrainLayout(()=>view.Frame.Top==Frame.Top+50);";
 
         private void AddViews()
         {
@@ -41,13 +41,24 @@ namespace LpricharCodeHour.Controls
         {
             base.Draw(rect);
 
-            nfloat[] colors = {
-                .04f, .54f, .12f, .8f,
+            nfloat[] colors1 = {
+                .12f, .54f, .25f, .9f,
+                0, 0, 0, 0,
+            };
+            nfloat[] colors2 = {
+                .04f, .54f, .12f, .7f,
+                0, 0, 0, 0,
+            };
+            nfloat[] colors3 = {
+                .04f, .54f, .12f, .4f,
                 0, 0, 0, 0,
             };
 
             using (var context = UIGraphics.GetCurrentContext())
-            using (var gradient = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors)) { 
+            using (var gradient1 = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors1))
+            using (var gradient2 = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors2))
+            using (var gradient3 = new CGGradient(CGColorSpace.CreateDeviceRGB(), colors3))
+            {
                 //var center = new CGPoint(rect.GetCenterX(), rect.Height - 20);
                 //var radius1 = 40;
 
@@ -60,19 +71,30 @@ namespace LpricharCodeHour.Controls
                  * ty => y0 
                  */
 
-                CGAffineTransform scaleT = CGAffineTransform.MakeScale(1, 4f);
-                CGAffineTransform invScaleT = CGAffineTransform.CGAffineTransformInvert(scaleT);
-                //// Extract the Sx and Sy elements from the inverse matrix
-                //// (See the Quartz documentation for the math behind the matrices)
-                CGPoint invS = new CGPoint(invScaleT.xx, invScaleT.yy);
-
-                //// Transform center and radius of gradient with the inverse
-                CGPoint center = new CGPoint((rect.Size.Width * .5f) * invS.X, (rect.Size.Height - 75) * invS.Y);
-                var radius = (rect.Size.Width / 2) * invS.X;
-                context.ScaleCTM(scaleT.xx, scaleT.yy);
-                context.DrawRadialGradient(gradient, center, 0, center, radius, CGGradientDrawingOptions.DrawsBeforeStartLocation);
-                context.ScaleCTM(invScaleT.xx, invScaleT.yy);
+                DrawRadialGradient(rect, context, gradient1, -35);
+                DrawRadialGradient(rect, context, gradient2, -65);
+                for (int i = 1; i < 6; i++)
+                {
+                    var delta = 65 + (30 * i);
+                    DrawRadialGradient(rect, context, gradient3, -delta);
+                }
             }
+        }
+
+        private static void DrawRadialGradient(CGRect rect, CGContext context, CGGradient gradient, int yOffset)
+        {
+            CGAffineTransform scaleT = CGAffineTransform.MakeScale(1, 2f);
+            CGAffineTransform invScaleT = CGAffineTransform.CGAffineTransformInvert(scaleT);
+            //// Extract the Sx and Sy elements from the inverse matrix
+            //// (See the Quartz documentation for the math behind the matrices)
+            CGPoint invS = new CGPoint(invScaleT.xx, invScaleT.yy);
+
+            //// Transform center and radius of gradient with the inverse
+            CGPoint center = new CGPoint((rect.Size.Width * .5f) * invS.X, (rect.Size.Height + yOffset) * invS.Y);
+            var radius = (rect.Size.Width * .4f) * invS.X;
+            context.ScaleCTM(scaleT.xx, scaleT.yy);
+            context.DrawRadialGradient(gradient, center, 0, center, radius, CGGradientDrawingOptions.DrawsBeforeStartLocation);
+            context.ScaleCTM(invScaleT.xx, invScaleT.yy);
         }
 
         private UILabel MakeUiLabel()
