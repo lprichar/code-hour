@@ -24,7 +24,7 @@ namespace LpricharCodeHour.Views
                     LayoutConstraint = layoutConstraint;
                 }
 
-                CodeStringView CodeStringView { get; }
+                public CodeStringView CodeStringView { get; }
                 int Column { get; }
                 NSLayoutConstraint LayoutConstraint { get; }
             }
@@ -102,6 +102,17 @@ namespace LpricharCodeHour.Views
                     1, -distanceFromCenter);
                 parent.AddConstraint(bottomConstraint);
                 return bottomConstraint;
+            }
+
+            public async Task StartAnimations(int delayInMs)
+            {
+                await Task.Delay(2000);
+                AllCodeStrings.ForEach(cs => cs.CodeStringView.StartAnimation());
+            }
+
+            public void StopAnimations()
+            {
+                AllCodeStrings.ForEach(cs => cs.CodeStringView.StopAnimation());
             }
         }
 
@@ -327,12 +338,14 @@ namespace LpricharCodeHour.Views
             try
             {
                 _mainCodeStringView.StartAnimation();
-
+                _codeStringCoordinator.StartAnimations(2000).FireAndForget();
                 _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
-                await AnimateNotifyAsync(8f, 0, UIViewAnimationOptions.CurveLinear, () =>
+                var duration = 10f;
+                AnimateNotify(duration, 0, UIViewAnimationOptions.CurveLinear, () =>
                 {
                     LayoutIfNeeded();
-                });
+                }, null);
+                await Task.Delay((int)duration * 1000);
 
                 //_row1Cursor.Stop();
                 //await TypeInitiate();
@@ -407,6 +420,7 @@ namespace LpricharCodeHour.Views
             _row2Cursor.Alpha = 1;
             _mainCodeStringView.StopAnimation();
             _mainCodeStringViewBottomConstraint.Constant = 0;
+            _codeStringCoordinator.StopAnimations();
         }
 
         private void MakeRowActive(int i)
