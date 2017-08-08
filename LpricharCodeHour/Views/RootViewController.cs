@@ -337,6 +337,18 @@ namespace LpricharCodeHour.Views
             _animationInProgress = true;
             try
             {
+                _row1Cursor.Stop();
+                await StartTerminalTyping();
+                // hit "enter" key
+                MakeRowActive(1);
+                HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
+
+                // slight delay to represent computer thinking after hitting "enter"
+                await Task.Delay(500);
+
+                StartCountdownAnim().FireAndForget();
+                await Task.Delay(3900);
+
                 _mainCodeStringView.StartAnimation();
                 _codeStringCoordinator.StartAnimations(2000).FireAndForget();
                 _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
@@ -345,18 +357,13 @@ namespace LpricharCodeHour.Views
                 {
                     LayoutIfNeeded();
                 }, null);
-                await Task.Delay((int)duration * 1000);
+                await Task.Delay(5000);
 
-                //_row1Cursor.Stop();
-                //await TypeInitiate();
-                //MakeRowActive(1);
-                //HideAfter(1500, _row2Cursor, _initiatingLabel).FireAndForget();
-                //await Task.Delay(500);
-                //await StartCountdownAnim();
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();
-                //await ZoomWatch();
-                //await ShowLpricharShowText();
+                await ZoomWatch();
+                await ShowLpricharShowText();
+
                 await Task.Delay(5000);
                 ResetEverything();
             }
@@ -429,7 +436,7 @@ namespace LpricharCodeHour.Views
             _row2Cursor.Hidden = i == 0;
         }
 
-        private async Task TypeInitiate()
+        private async Task StartTerminalTyping()
         {
             var duration = 200;
             await AppendInitiateCharacter("i", duration / 2);
