@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using LpricharCodeHour.Controls;
-using LpricharCodeHour.Views;
 using UIKit;
 
 namespace LpricharCodeHour.Utils
@@ -11,26 +10,24 @@ namespace LpricharCodeHour.Utils
     {
         class CodeStringMeta
         {
-            public CodeStringMeta(CodeStringView codeStringView, int column, NSLayoutConstraint layoutConstraint)
+            public CodeStringMeta(CodeStringView codeStringView, int column)
             {
                 CodeStringView = codeStringView;
                 Column = column;
-                LayoutConstraint = layoutConstraint;
             }
 
             public CodeStringView CodeStringView { get; }
             int Column { get; }
-            NSLayoutConstraint LayoutConstraint { get; }
         }
 
-        private readonly List<CodeStringMeta> AllCodeStrings = new List<CodeStringMeta>();
+        private readonly List<CodeStringMeta> _allCodeStrings = new List<CodeStringMeta>();
         public nfloat TextWidth { private get; set; }
         public nfloat TextHeight { private get; set; }
         public CodeStringView CenterCodeString { private get; set; }
 
         public CodeStringView AddToRightOf(int column, CodeStringView relativeView, UIView parent)
         {
-            var codeStringView = RootView.AddCodeStringView(parent);
+            var codeStringView = AddCodeStringView(parent);
             var pixelsBetweenRows = GetPixelsBetweenRows();
             parent.ConstrainLayout(() =>
                 codeStringView.Frame.Left == relativeView.Frame.Right + pixelsBetweenRows
@@ -41,7 +38,7 @@ namespace LpricharCodeHour.Utils
 
         public CodeStringView AddToLeftOf(int column, CodeStringView relativeView, UIView parent)
         {
-            var codeStringView = RootView.AddCodeStringView(parent);
+            var codeStringView = AddCodeStringView(parent);
             var pixelsBetweenRows = GetPixelsBetweenRows();
             parent.ConstrainLayout(() =>
                 codeStringView.Frame.Right == relativeView.Frame.Left - pixelsBetweenRows
@@ -52,16 +49,16 @@ namespace LpricharCodeHour.Utils
 
         private nfloat GetPixelsBetweenRows()
         {
-            return RootView.CodeStringMargin - TextWidth;
+            return CodeStringsScene.CodeStringMargin - TextWidth;
         }
 
         private CodeStringView ConstrainAndAddToMeta(int column, UIView parent, CodeStringView codeStringView)
         {
             AddWidthConstraint(parent, codeStringView);
             AddHeightConstraint(parent, codeStringView);
-            var bottomConstraint = AddBottomConstraint(parent, codeStringView, CenterCodeString, column);
-            var codeStringMeta = new CodeStringMeta(codeStringView, column, bottomConstraint);
-            AllCodeStrings.Add(codeStringMeta);
+            AddBottomConstraint(parent, codeStringView, CenterCodeString, column);
+            var codeStringMeta = new CodeStringMeta(codeStringView, column);
+            _allCodeStrings.Add(codeStringMeta);
             return codeStringView;
         }
 
@@ -83,10 +80,10 @@ namespace LpricharCodeHour.Utils
             if (column == 3) return 600;
             if (column == -5) return 620;
             if (column == 2) return 700;
-            return DistanceFromCenterRandom.Next(800, RootView.MaxDistanceFromCenter);
+            return DistanceFromCenterRandom.Next(800, CodeStringsScene.MaxDistanceFromCenter);
         }
 
-        private static NSLayoutConstraint AddBottomConstraint(UIView parent, CodeStringView codeStringView, UIView centerCodeString, int column)
+        private static void AddBottomConstraint(UIView parent, CodeStringView codeStringView, UIView centerCodeString, int column)
         {
             var distanceFromCenter = GetDistanceFromCenter(column);
             var bottomConstraint = NSLayoutConstraint.Create(
@@ -95,18 +92,24 @@ namespace LpricharCodeHour.Utils
                 centerCodeString, NSLayoutAttribute.Bottom,
                 1, -distanceFromCenter);
             parent.AddConstraint(bottomConstraint);
-            return bottomConstraint;
         }
 
         public async Task StartAnimations(int delayInMs)
         {
-            await Task.Delay(2000);
-            AllCodeStrings.ForEach(cs => cs.CodeStringView.StartAnimation());
+            await Task.Delay(delayInMs);
+            _allCodeStrings.ForEach(cs => cs.CodeStringView.StartAnimation());
         }
 
         public void StopAnimations()
         {
-            AllCodeStrings.ForEach(cs => cs.CodeStringView.StopAnimation());
+            _allCodeStrings.ForEach(cs => cs.CodeStringView.StopAnimation());
+        }
+
+        public static CodeStringView AddCodeStringView(UIView parent)
+        {
+            var codeStringView = new CodeStringView();
+            parent.AddSubview(codeStringView);
+            return codeStringView;
         }
     }
 }

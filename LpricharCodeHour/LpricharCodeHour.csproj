@@ -85,7 +85,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Controls\BlinkySquareView.cs" />
-    <Compile Include="Controls\CodeStringsView.cs" />
+    <Compile Include="Controls\CodeStringsScene.cs" />
     <Compile Include="Controls\CodeStringView.cs" />
     <Compile Include="Controls\CounterView.cs" />
     <Compile Include="Main.cs" />

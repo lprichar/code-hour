@@ -11,8 +11,6 @@ namespace LpricharCodeHour.Views
 {
     public class RootView : UIView
     {
-        public const int MaxDistanceFromCenter = 2500;
-        public const float CodeStringMargin = 4f;
         private UILabel _initiatingLabel;
         private UIView _codeHourFrame;
         private CounterView _counterView;
@@ -23,34 +21,12 @@ namespace LpricharCodeHour.Views
         private UILabel _codeHourLabel;
         private BlinkySquareView _row1Cursor;
         private BlinkySquareView _row2Cursor;
-        private readonly CodeStringCoordinator _codeStringCoordinator = new CodeStringCoordinator();
 
         public RootView()
         {
             Initialize();
             AddViews();
             ConstrainLayout();
-            AddRemainingCodeStrings();
-        }
-
-        private void AddRemainingCodeStrings()
-        {
-            LayoutIfNeeded();
-            var textWidth = _mainCodeStringView.GetTextWidth();
-            var screenWidth = UIScreen.MainScreen.Bounds.Width;
-            var halfScreenWidth = screenWidth / 2;
-            var linesPerHalfScreen = halfScreenWidth / (textWidth + CodeStringMargin);
-            var previousLeftCodeStringRow = _mainCodeStringView;
-            var previousRightCodeStringRow = _mainCodeStringView;
-            _codeStringCoordinator.TextWidth = textWidth;
-            _codeStringCoordinator.TextHeight = _mainCodeStringView.GetTextHeight();
-            _codeStringCoordinator.CenterCodeString = _mainCodeStringView;
-            for (int column = 0; column < linesPerHalfScreen; column++)
-            {
-                var oneBasedColumn = column + 1;
-                previousRightCodeStringRow = _codeStringCoordinator.AddToRightOf(oneBasedColumn, previousRightCodeStringRow, this);
-                previousLeftCodeStringRow = _codeStringCoordinator.AddToLeftOf(-oneBasedColumn, previousLeftCodeStringRow, this);
-            }
         }
 
         void Initialize()
@@ -71,17 +47,14 @@ namespace LpricharCodeHour.Views
             _codeHourLabel.Alpha = 0f;
             _row1Cursor = AddBlinkySquareView(this);
             _row2Cursor = AddBlinkySquareView(this);
-            _mainCodeStringView = AddCodeStringView(this);
+            _codeStringsScene = AddCodeStringsView(this);
         }
 
-        public static CodeStringView AddCodeStringView(UIView parent)
+        private static CodeStringsScene AddCodeStringsView(UIView parent)
         {
-            var codeStringView = new CodeStringView
-            {
-                BackgroundColor = _backgroundColor
-            };
-            parent.AddSubview(codeStringView);
-            return codeStringView;
+            var codeStringsView = new CodeStringsScene();
+            parent.AddSubview(codeStringsView);
+            return codeStringsView;
         }
 
         private static UIView AddView(UIView parent)
@@ -91,14 +64,12 @@ namespace LpricharCodeHour.Views
             return view;
         }
 
-
         private static BlinkySquareView AddBlinkySquareView(UIView parent)
         {
             var blinkySquareView = new BlinkySquareView();
             parent.AddSubview(blinkySquareView);
             return blinkySquareView;
         }
-
 
         private void AddLpricharLabel()
         {
@@ -142,9 +113,6 @@ namespace LpricharCodeHour.Views
 
         private void ConstrainLayout()
         {
-            var textWidth = _mainCodeStringView.GetTextWidth() * 3;
-            var textHeight = _mainCodeStringView.GetTextHeight();
-
             this.ConstrainLayout(() =>
                 _initiatingLabel.Frame.Top == Frame.Top + 50
                 && _initiatingLabel.Frame.Left == Frame.Left + 10
@@ -181,14 +149,12 @@ namespace LpricharCodeHour.Views
                 && _codeHourFrame.Frame.Right == _lpricharLabel.Frame.Right + 280
                 && _codeHourFrame.Frame.Bottom == _codeHourLabel.Frame.Bottom + 65
 
-                && _mainCodeStringView.Frame.GetCenterX() == Frame.GetCenterX()
-                && _mainCodeStringView.Frame.Width == textWidth
-                && _mainCodeStringView.Frame.Height == textHeight
-                && _mainCodeStringView.Frame.Bottom == Frame.Top
+                && _codeStringsScene.Frame.Top == Frame.Top
+                && _codeStringsScene.Frame.Left == Frame.Left
+                && _codeStringsScene.Frame.Right == Frame.Right
+                && _codeStringsScene.Frame.Bottom == Frame.Bottom
             );
 
-            _mainCodeStringViewBottomConstraint = Constraints.First(i => i.FirstItem == _mainCodeStringView &&
-                                                                         i.FirstAttribute == NSLayoutAttribute.Bottom);
         }
 
         private async Task StartCountdownAnim()
@@ -217,10 +183,9 @@ namespace LpricharCodeHour.Views
         }
 
         private bool _animationInProgress = false;
-        private CodeStringView _mainCodeStringView;
-        private NSLayoutConstraint _mainCodeStringViewBottomConstraint;
         const float BackgroundColorFloat = 0.1450980392156863f;
         private static readonly UIColor _backgroundColor = UIColor.FromRGB(BackgroundColorFloat, BackgroundColorFloat, BackgroundColorFloat);
+        private CodeStringsScene _codeStringsScene;
 
         public override async void TouchesEnded(NSSet touches, UIEvent evt)
         {
@@ -246,9 +211,7 @@ namespace LpricharCodeHour.Views
                 StartCountdownAnim().FireAndForget();
                 await Task.Delay(3900);
 
-                _mainCodeStringView.StartAnimation();
-                _codeStringCoordinator.StartAnimations(2000).FireAndForget();
-                _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
+                _codeStringsScene.AnimateOnce();
                 var duration = 12f;
                 AnimateNotify(duration, 0, UIViewAnimationOptions.CurveLinear, LayoutIfNeeded, null);
                 await Task.Delay(11000);
@@ -319,9 +282,7 @@ namespace LpricharCodeHour.Views
             MakeRowActive(0);
             _row1Cursor.Start();
             _row2Cursor.Alpha = 1;
-            _mainCodeStringView.StopAnimation();
-            _mainCodeStringViewBottomConstraint.Constant = 0;
-            _codeStringCoordinator.StopAnimations();
+            _codeStringsScene.Reset();
         }
 
         private void MakeRowActive(int i)
