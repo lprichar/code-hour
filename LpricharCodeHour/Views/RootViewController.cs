@@ -352,12 +352,12 @@ namespace LpricharCodeHour.Views
                 _mainCodeStringView.StartAnimation();
                 _codeStringCoordinator.StartAnimations(2000).FireAndForget();
                 _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
-                var duration = 10f;
+                var duration = 12f;
                 AnimateNotify(duration, 0, UIViewAnimationOptions.CurveLinear, () =>
                 {
                     LayoutIfNeeded();
                 }, null);
-                await Task.Delay(8500);
+                await Task.Delay(11000);
 
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();

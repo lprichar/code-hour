@@ -190,7 +190,7 @@ namespace LpricharCodeHour.Controls
                 var newChar = BaseStr[Rnd.Next(0, BaseStr.Length - 1)];
                 //Console.WriteLine($"Replacing char at #{charToReplace} which is '{existingChar}' with '{newChar}'");
                 _uiLabels[charToReplace].Text = newChar.ToString();
-                await Task.Delay(100);
+                await Task.Delay(40);
             }
         }
 
