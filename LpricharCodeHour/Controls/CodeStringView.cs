@@ -181,7 +181,7 @@ namespace LpricharCodeHour.Controls
             return codeText.ToArray();
         }
 
-        public async void StartAnimation()
+        public async void StartCharacterAnimations()
         {
             if (_animationRunning) return;
             _animationRunning = true;

@@ -211,10 +211,8 @@ namespace LpricharCodeHour.Views
                 StartCountdownAnim().FireAndForget();
                 await Task.Delay(3900);
 
-                _codeStringsScene.AnimateOnce();
-                var duration = 12f;
-                AnimateNotify(duration, 0, UIViewAnimationOptions.CurveLinear, LayoutIfNeeded, null);
-                await Task.Delay(11000);
+                var durationInMs = _codeStringsScene.AnimateOnce();
+                await Task.Delay(durationInMs - 1000);
 
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();

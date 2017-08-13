@@ -94,10 +94,10 @@ namespace LpricharCodeHour.Utils
             parent.AddConstraint(bottomConstraint);
         }
 
-        public async Task StartAnimations(int delayInMs)
+        public async Task StartCharacterAnimations(int delayInMs)
         {
             await Task.Delay(delayInMs);
-            _allCodeStrings.ForEach(cs => cs.CodeStringView.StartAnimation());
+            _allCodeStrings.ForEach(cs => cs.CodeStringView.StartCharacterAnimations());
         }
 
         public void StopAnimations()

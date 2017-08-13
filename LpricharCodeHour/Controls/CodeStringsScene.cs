@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using CoreGraphics;
 using LpricharCodeHour.Utils;
 using UIKit;
 
@@ -40,7 +41,7 @@ namespace LpricharCodeHour.Controls
             AddRemainingCodeStrings();
         }
 
-        public void AddRemainingCodeStrings()
+        private void AddRemainingCodeStrings()
         {
             LayoutIfNeeded();
             var textWidth = _mainCodeStringView.GetTextWidth();
@@ -60,11 +61,27 @@ namespace LpricharCodeHour.Controls
             }
         }
 
-        public void AnimateOnce()
+        private const float CodeFallingDurationduration = 12f;
+
+        public int AnimateOnce()
         {
-            _mainCodeStringView.StartAnimation();
-            _codeStringCoordinator.StartAnimations(2000).FireAndForget();
+            _mainCodeStringView.StartCharacterAnimations();
+            _codeStringCoordinator.StartCharacterAnimations(delayInMs: 1000).FireAndForget();
+            Zoom(delay: 1f);
+            AnimateCodeFalling();
+            return (int)CodeFallingDurationduration * 1000;
+        }
+
+        private void AnimateCodeFalling()
+        {
             _mainCodeStringViewBottomConstraint.Constant = UIScreen.MainScreen.Bounds.Height + _mainCodeStringView.GetTextHeight() + MaxDistanceFromCenter;
+            AnimateNotify(CodeFallingDurationduration, 0, UIViewAnimationOptions.CurveLinear, LayoutIfNeeded, null);
+        }
+
+        private void Zoom(float delay)
+        {
+            var zoomTransform = CGAffineTransform.MakeScale(1.3f, 1.3f);
+            AnimateNotify(7f, delay, UIViewAnimationOptions.CurveEaseIn, () => { Transform = zoomTransform; }, null);
         }
 
         public void Reset()
@@ -72,6 +89,7 @@ namespace LpricharCodeHour.Controls
             _mainCodeStringView.StopAnimation();
             _mainCodeStringViewBottomConstraint.Constant = 0;
             _codeStringCoordinator.StopAnimations();
+            Transform = CGAffineTransform.MakeScale(1, 1);
         }
     }
 }
