@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CoreGraphics;
-using Foundation;
 using LpricharCodeHour.Utils;
 using UIKit;
 
@@ -10,7 +10,12 @@ namespace LpricharCodeHour.Controls
 {
     public sealed class CodeStringView : UIView
     {
-        private UILabel _uiLabel;
+        private UILabel[] _uiLabels;
+        private char[] _codeText;
+        private const float CharMargin = 2;
+        private const string BaseStr = "if(_inProgress)returntrue;try{_row.Stop();}catch(Exceptionex){Console.Write(\"Errorinanimation\"+ex);}this.ConstrainLayout(()=>view.Frame.Top==Frame.Top+50);";
+        private nfloat? _textHeight;
+        private nfloat? _textWidth;
 
         public CodeStringView()
         {
@@ -21,20 +26,79 @@ namespace LpricharCodeHour.Controls
 
         private void ConstrainLayout()
         {
+            var first = _uiLabels[0];
+
             this.ConstrainLayout(() =>
-                _uiLabel.Frame.GetCenterX() == Frame.GetCenterX()
-                && _uiLabel.Frame.Bottom == Frame.Bottom - 20
+                first.Frame.GetCenterX() == Frame.GetCenterX()
+                && first.Frame.Bottom == Frame.Bottom - 20
             );
+
+            var previous = first;
+
+            for (int i = 1; i < _uiLabels.Length; i++)
+            {
+                var current = _uiLabels[i];
+                this.ConstrainLayout(() =>
+                    current.Frame.GetCenterX() == Frame.GetCenterX()
+                    && current.Frame.Bottom == previous.Frame.Top + CharMargin
+                );
+                previous = current;
+            }
         }
 
         private static readonly Random Rnd = new Random(47);
         private bool _animationRunning = false;
 
-        private const string BaseStr = "if(_inProgress)returntrue;try{_row.Stop();}catch(Exceptionex){Console.Write(\"Errorinanimation\"+ex);}this.ConstrainLayout(()=>view.Frame.Top==Frame.Top+50);";
+        private static readonly UIColor[] UiColors = {
+            UIColor.FromRGB(146, 246, 162),
+            UIColor.FromRGB(121, 226, 131),
+            UIColor.FromRGB(100, 218, 113),
+            UIColor.FromRGB(97, 225, 122),
+            UIColor.FromRGB(117, 239, 122),
+            UIColor.FromRGB(111, 226, 128),
+            UIColor.FromRGB(100, 226, 124),
+            UIColor.FromRGB(100, 209, 112),
+            UIColor.FromRGB(91, 220, 124),
+            UIColor.FromRGB(95, 213, 101),
+            UIColor.FromRGB(86, 189, 97),
+            UIColor.FromRGB(100, 212, 115),
+            UIColor.FromRGB(27, 161, 50),
+            UIColor.FromRGB(61, 174, 85),
+            UIColor.FromRGB(63, 193, 94),
+            UIColor.FromRGB(43, 171, 74),
+            UIColor.FromRGB(81, 193, 104),
+            UIColor.FromRGB(71, 172, 90),
+            UIColor.FromRGB(40, 164, 58),
+            UIColor.FromRGB(47, 151, 70),
+            UIColor.FromRGB(25, 178, 58),
+            UIColor.FromRGB(14, 154, 46),
+            UIColor.FromRGB(68, 144, 72),
+            UIColor.FromRGB(17, 155, 53),
+            UIColor.FromRGB(33, 98, 42),
+            UIColor.FromRGB(29, 112, 37),
+        };
 
         private void AddViews()
         {
-            _uiLabel = MakeUiLabel();
+            _codeText = GetCodeString();
+            _uiLabels = MakeUiLabels(_codeText).ToArray();
+            SetLabelColors(_codeText);
+        }
+
+        private void SetLabelColors(char[] codeText)
+        {
+            var colorCount = UiColors.Length;
+
+            int i = 0;
+            foreach (var uiLabel in _uiLabels)
+            {
+                var percentCharInString = (float)i / codeText.Length;
+                var colorToUse = (int)Math.Ceiling(percentCharInString * (colorCount - 1));
+                var color = UiColors[colorToUse];
+                uiLabel.TextColor = color;
+
+                i++;
+            }
         }
 
         public override void Draw(CGRect rect)
@@ -42,7 +106,7 @@ namespace LpricharCodeHour.Controls
             base.Draw(rect);
 
             nfloat red, green, blue, alpha;
-            this.BackgroundColor.GetRGBA(out red, out green, out blue, out alpha);
+            BackgroundColor.GetRGBA(out red, out green, out blue, out alpha);
 
             nfloat[] colors1 = {
                 .25f, .74f, .39f, 1f,
@@ -100,28 +164,32 @@ namespace LpricharCodeHour.Controls
             context.ScaleCTM(invScaleT.xx, invScaleT.yy);
         }
 
-        private UILabel MakeUiLabel()
+        private IEnumerable<UILabel> MakeUiLabels(char[] codeText)
+        {
+            foreach (var charInStr in codeText)
+            {
+                yield return AddLabel(this, charInStr.ToString());
+            }
+        }
+
+        private static char[] GetCodeString()
         {
             const int charsInString = 26;
             var startChar = Rnd.Next(0, BaseStr.Length - charsInString - 1);
             var codeText = BaseStr.ToCharArray().Skip(startChar).Take(charsInString);
-            var str = string.Join(Environment.NewLine, codeText);
-            return AddLabel(this, str);
+            return codeText.ToArray();
         }
 
         public async void StartAnimation()
         {
             if (_animationRunning) return;
             _animationRunning = true;
-            var nsMutableAttributedString = (NSMutableAttributedString)_uiLabel.AttributedText;
             while (_animationRunning)
             {
-                var charToReplace = Rnd.Next(0, _uiLabel.Text.Length);
-                if (_uiLabel.Text[charToReplace] == '\n') charToReplace--;
+                var charToReplace = Rnd.Next(0, _codeText.Length - 1);
                 var newChar = BaseStr[Rnd.Next(0, BaseStr.Length - 1)];
-                nsMutableAttributedString.Replace(new NSRange(charToReplace, 1), newChar.ToString());
-                _uiLabel.Text = nsMutableAttributedString.Value;
-                _uiLabel.AttributedText = nsMutableAttributedString;
+                //Console.WriteLine($"Replacing char at #{charToReplace} which is '{existingChar}' with '{newChar}'");
+                _uiLabels[charToReplace].Text = newChar.ToString();
                 await Task.Delay(100);
             }
         }
@@ -133,57 +201,11 @@ namespace LpricharCodeHour.Controls
 
         private static UILabel AddLabel(UIView parent, string str)
         {
+
             var label = new UILabel();
             parent.AddSubview(label);
 
-            var uiColors = new []
-            {
-                UIColor.FromRGB(29, 112, 37),
-                UIColor.FromRGB(33, 98, 42),
-                UIColor.FromRGB(17, 155, 53),
-                UIColor.FromRGB(68, 144, 72),
-                UIColor.FromRGB(14, 154, 46),
-                UIColor.FromRGB(25, 178, 58),
-                UIColor.FromRGB(47, 151, 70),
-                UIColor.FromRGB(40, 164, 58),
-                UIColor.FromRGB(71, 172, 90),
-                UIColor.FromRGB(81, 193, 104),
-                UIColor.FromRGB(43, 171, 74),
-                UIColor.FromRGB(63, 193, 94),
-                UIColor.FromRGB(61, 174, 85),
-                UIColor.FromRGB(27, 161, 50),
-                UIColor.FromRGB(100, 212, 115),
-                UIColor.FromRGB(86, 189, 97),
-                UIColor.FromRGB(95, 213, 101),
-                UIColor.FromRGB(91, 220, 124),
-                UIColor.FromRGB(100, 209, 112),
-                UIColor.FromRGB(100, 226, 124),
-                UIColor.FromRGB(111, 226, 128),
-                UIColor.FromRGB(117, 239, 122),
-                UIColor.FromRGB(97, 225, 122),
-                UIColor.FromRGB(100, 218, 113),
-                UIColor.FromRGB(121, 226, 131),
-                UIColor.FromRGB(146, 246, 162),
-            };
-
-            var attributes = uiColors
-                .Select(c => new UIStringAttributes {ForegroundColor = c})
-                .ToArray();
-
-            var attributedString = new NSMutableAttributedString(str);
-
-            var colorCount = uiColors.Length;
-
-            for (int i = 0; i < str.Length; i++)
-            {
-                var percentCharInString = (float)i / str.Length;
-                var attrToUse = (int) Math.Ceiling(percentCharInString * (colorCount - 1));
-                var attribute = attributes[attrToUse];
-                attributedString.SetAttributes(attribute, new NSRange(i, 1));
-            }
-
-            label.AttributedText = attributedString;
-            label.Lines = 0;
+            label.Text = str;
             label.LineBreakMode = UILineBreakMode.Clip;
             label.Font = UIFont.FromName(label.Font.Name, 26f);
             label.TextAlignment = UITextAlignment.Center;
@@ -193,14 +215,27 @@ namespace LpricharCodeHour.Controls
 
         public nfloat GetTextHeight()
         {
-            _uiLabel.SizeToFit();
-            return _uiLabel.Frame.Height;
+            return _textHeight ?? (_textHeight = CalculateTextHeight()).Value;
+        }
+
+        private nfloat CalculateTextHeight()
+        {
+            var firstLabel = _uiLabels[0];
+            firstLabel.SizeToFit();
+            var charHeight = firstLabel.Frame.Height;
+            return (charHeight + CharMargin) * _codeText.Length;
         }
 
         public nfloat GetTextWidth()
         {
-            _uiLabel.SizeToFit();
-            return _uiLabel.Frame.Width;
+            return _textWidth ?? (_textWidth = CalculateTextWidth()).Value;
+        }
+
+        private nfloat CalculateTextWidth()
+        {
+            var firstLabel = _uiLabels[0];
+            firstLabel.SizeToFit();
+            return firstLabel.Frame.Width;
         }
     }
 }

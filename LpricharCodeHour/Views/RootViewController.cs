@@ -357,7 +357,7 @@ namespace LpricharCodeHour.Views
                 {
                     LayoutIfNeeded();
                 }, null);
-                await Task.Delay(5000);
+                await Task.Delay(8500);
 
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();
