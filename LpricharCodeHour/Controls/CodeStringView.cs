@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CoreGraphics;
 using LpricharCodeHour.Utils;
+using LpricharCodeHour.Views;
 using UIKit;
 
 namespace LpricharCodeHour.Controls
@@ -19,7 +20,7 @@ namespace LpricharCodeHour.Controls
 
         public CodeStringView()
         {
-            BackgroundColor = UIColor.Clear;
+            BackgroundColor = new UIColor(RootView.BackgroundColorFloat, RootView.BackgroundColorFloat, RootView.BackgroundColorFloat, 1f);
             AddViews();
             ConstrainLayout();
         }
@@ -105,20 +106,20 @@ namespace LpricharCodeHour.Controls
         {
             base.Draw(rect);
 
-            nfloat red, green, blue, alpha;
-            BackgroundColor.GetRGBA(out red, out green, out blue, out alpha);
+            
+            nfloat bgf = RootView.BackgroundColorFloat;
 
             nfloat[] colors1 = {
                 .25f, .74f, .39f, 1f,
-                red, green, blue, 0,
+                bgf, bgf, bgf, 0,
             };
             nfloat[] colors2 = {
                 .10f, .46f, .18f, 1f,
-                red, green, blue, 0,
+                bgf, bgf, bgf, 0,
             };
             nfloat[] colors3 = {
                 .08f, .34f, .09f, 1f,
-                red, green, blue, 0,
+                bgf, bgf, bgf, 0,
             };
 
             using (var context = UIGraphics.GetCurrentContext())

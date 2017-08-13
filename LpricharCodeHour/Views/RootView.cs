@@ -183,7 +183,7 @@ namespace LpricharCodeHour.Views
         }
 
         private bool _animationInProgress = false;
-        const float BackgroundColorFloat = 0.1450980392156863f;
+        public const float BackgroundColorFloat = 0.1450980392156863f;
         private static readonly UIColor _backgroundColor = UIColor.FromRGB(BackgroundColorFloat, BackgroundColorFloat, BackgroundColorFloat);
         private CodeStringsScene _codeStringsScene;
 
