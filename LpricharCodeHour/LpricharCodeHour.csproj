@@ -85,13 +85,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Controls\BlinkySquareView.cs" />
+    <Compile Include="Controls\CodeStringsView.cs" />
     <Compile Include="Controls\CodeStringView.cs" />
     <Compile Include="Controls\CounterView.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Utils\AnimationUtils.cs" />
+    <Compile Include="Utils\CodeStringCoordinator.cs" />
     <Compile Include="Utils\EasyLayout.cs" />
     <Compile Include="Utils\TaskUtils.cs" />
+    <Compile Include="Views\RootView.cs" />
     <Compile Include="Views\RootViewController.cs" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
