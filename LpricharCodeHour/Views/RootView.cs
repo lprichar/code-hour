@@ -12,13 +12,10 @@ namespace LpricharCodeHour.Views
     public class RootView : UIView
     {
         private UILabel _initiatingLabel;
-        private UIView _codeHourFrame;
         private CounterView _counterView;
         private UILabel _counterLabel;
         private UIImageView _watchImageView;
         private UIImage _watch;
-        private UILabel _lpricharLabel;
-        private UILabel _codeHourLabel;
         private BlinkySquareView _row1Cursor;
         private BlinkySquareView _row2Cursor;
 
@@ -36,15 +33,11 @@ namespace LpricharCodeHour.Views
 
         private void AddViews()
         {
-            _codeHourFrame = AddView(this);
-            _initiatingLabel = AddLabel(this, "", 20);
-            _counterLabel = AddLabel(this, "", 40);
+            _initiatingLabel = this.AddLabel("", 20, UIColor.White);
+            _counterLabel = this.AddLabel("", 40, UIColor.White);
             _watch = UIImage.FromBundle("Watch");
             _watchImageView = AddImageView(this, _watch);
             _counterView = AddCounterView(this);
-            AddLpricharLabel();
-            _codeHourLabel = AddLabel(this, "code hour", 60);
-            _codeHourLabel.Alpha = 0f;
             _row1Cursor = AddBlinkySquareView(this);
             _row2Cursor = AddBlinkySquareView(this);
             _codeStringsScene = AddCodeStringsView(this);
@@ -57,25 +50,11 @@ namespace LpricharCodeHour.Views
             return codeStringsView;
         }
 
-        private static UIView AddView(UIView parent)
-        {
-            var view = new UIView();
-            parent.AddSubview(view);
-            return view;
-        }
-
         private static BlinkySquareView AddBlinkySquareView(UIView parent)
         {
             var blinkySquareView = new BlinkySquareView();
             parent.AddSubview(blinkySquareView);
             return blinkySquareView;
-        }
-
-        private void AddLpricharLabel()
-        {
-            _lpricharLabel = AddLabel(this, "lprichar", 75);
-            _lpricharLabel.Alpha = 0f;
-            _lpricharLabel.TextColor = UIColor.FromRGB(213, 43, 47);
         }
 
         private static UIImageView AddImageView(UIView parent, UIImage image)
@@ -96,19 +75,6 @@ namespace LpricharCodeHour.Views
             var counterView = new CounterView();
             parent.AddSubview(counterView);
             return counterView;
-        }
-
-        private static UILabel AddLabel(UIView parent, string text, nfloat fontSize)
-        {
-            var label = new UILabel
-            {
-                Text = text,
-                Lines = 0,
-                TextColor = UIColor.White,
-            };
-            label.Font = label.Font.WithSize(fontSize);
-            parent.AddSubview(label);
-            return label;
         }
 
         private void ConstrainLayout()
@@ -137,17 +103,6 @@ namespace LpricharCodeHour.Views
 
                 && _watchImageView.Frame.GetCenterY() == Frame.GetCenterY()
                 && _watchImageView.Frame.GetCenterX() == Frame.GetCenterX() + 200
-
-                && _lpricharLabel.Frame.Right == Frame.GetCenterX() + 40
-                && _lpricharLabel.Frame.Bottom == Frame.GetCenterY() - 15
-
-                && _codeHourLabel.Frame.Top == Frame.GetCenterY() + 15
-                && _codeHourLabel.Frame.Right == _lpricharLabel.Frame.Right
-
-                && _codeHourFrame.Frame.Top == _lpricharLabel.Frame.Top - 60
-                && _codeHourFrame.Frame.Left == _codeHourLabel.Frame.Left - 30
-                && _codeHourFrame.Frame.Right == _lpricharLabel.Frame.Right + 280
-                && _codeHourFrame.Frame.Bottom == _codeHourLabel.Frame.Bottom + 65
 
                 && _codeStringsScene.Frame.Top == Frame.Top
                 && _codeStringsScene.Frame.Left == Frame.Left
@@ -199,6 +154,9 @@ namespace LpricharCodeHour.Views
             _animationInProgress = true;
             try
             {
+                // give a sec to move the mouse away
+                await Task.Delay(1000);
+
                 _row1Cursor.Stop();
                 await StartTerminalTyping();
                 // hit "enter" key
@@ -217,7 +175,7 @@ namespace LpricharCodeHour.Views
                 //_counterView.Frame = _codeHourFrame.Frame;
                 //_counterView.AnimateToSquare();
                 await ZoomWatch();
-                await ShowLpricharShowText();
+                await _codeStringsScene.ShowLpricharShowText();
 
                 await Task.Delay(5000);
                 ResetEverything();
@@ -245,17 +203,6 @@ namespace LpricharCodeHour.Views
             }
         }
 
-        private async Task ShowLpricharShowText()
-        {
-            _lpricharLabel.Alpha = 0;
-            _codeHourLabel.Alpha = 0;
-            await AnimateAsync(.5f, () =>
-            {
-                _lpricharLabel.Alpha = 1;
-                _codeHourLabel.Alpha = 1;
-            });
-        }
-
         private async Task ZoomWatch()
         {
             _watchImageView.Alpha = 0;
@@ -275,8 +222,6 @@ namespace LpricharCodeHour.Views
             _initiatingLabel.Alpha = 1;
             _watchImageView.Alpha = 0;
             _watchImageView.Transform = CGAffineTransform.MakeScale(6f, 6f);
-            _lpricharLabel.Alpha = 0;
-            _codeHourLabel.Alpha = 0;
             MakeRowActive(0);
             _row1Cursor.Start();
             _row2Cursor.Alpha = 1;

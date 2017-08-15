@@ -25,6 +25,8 @@ namespace LpricharCodeHour.Controls
             ConstrainLayout();
         }
 
+        public const int FontSize = 26;
+
         private void ConstrainLayout()
         {
             var first = _uiLabels[0];
@@ -208,7 +210,7 @@ namespace LpricharCodeHour.Controls
 
             label.Text = str;
             label.LineBreakMode = UILineBreakMode.Clip;
-            label.Font = UIFont.FromName(label.Font.Name, 26f);
+            label.Font = UIFont.FromName(label.Font.Name, FontSize);
             label.TextAlignment = UITextAlignment.Center;
 
             return label;

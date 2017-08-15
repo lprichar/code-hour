@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using LpricharCodeHour.Controls;
 using UIKit;
@@ -17,7 +18,7 @@ namespace LpricharCodeHour.Utils
             }
 
             public CodeStringView CodeStringView { get; }
-            int Column { get; }
+            public int Column { get; }
         }
 
         private readonly List<CodeStringMeta> _allCodeStrings = new List<CodeStringMeta>();
@@ -110,6 +111,11 @@ namespace LpricharCodeHour.Utils
             var codeStringView = new CodeStringView();
             parent.AddSubview(codeStringView);
             return codeStringView;
+        }
+
+        public CodeStringView GetCodeStringViewAtColumn(int column)
+        {
+            return _allCodeStrings.First(i => i.Column == column).CodeStringView;
         }
     }
 }

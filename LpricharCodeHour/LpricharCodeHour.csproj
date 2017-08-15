@@ -94,6 +94,7 @@
     <Compile Include="Utils\CodeStringCoordinator.cs" />
     <Compile Include="Utils\EasyLayout.cs" />
     <Compile Include="Utils\TaskUtils.cs" />
+    <Compile Include="Utils\ViewUtils.cs" />
     <Compile Include="Views\RootView.cs" />
     <Compile Include="Views\RootViewController.cs" />
     <None Include="Info.plist" />
