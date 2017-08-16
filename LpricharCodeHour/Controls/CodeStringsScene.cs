@@ -90,7 +90,7 @@ namespace LpricharCodeHour.Controls
 
         private void AddLpricharLabel()
         {
-            _lpricharLabel = this.AddLabel("lprichar", 85, UIColor.FromRGB(142, 164, 128));
+            _lpricharLabel = this.AddLabel("l p r i c h a r", 50, UIColor.White);
             _lpricharLabel.Hidden = true;
             _lpricharLabel.TextAlignment = UITextAlignment.Right;
             _lpricharLabel.Alpha = 0f;
